@@ -1,0 +1,174 @@
+/* ===== BACKGROUND ===== */
+.container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background: linear-gradient(
+    120deg,
+    #22d3ee,
+    #0ea5e9,
+    #6366f1,
+    #020617
+  );
+  background-size: 400% 400%;
+  animation: bgMove 14s ease infinite;
+}
+
+@keyframes bgMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ===== CARD ===== */
+.card {
+  width: 340px;
+  padding: 30px;
+  border-radius: 18px;
+  background: rgba(2, 6, 23, 0.88);
+  box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+  color: white;
+}
+
+/* ===== TEXT ===== */
+h1 {
+  text-align: center;
+  color: #38bdf8;
+}
+
+.subtitle {
+  text-align: center;
+  font-size: 14px;
+  opacity: 0.8;
+  margin-bottom: 24px;
+}
+
+label {
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+input {
+  width: 100%;
+  padding: 10px 14px;   /* lebih tipis */
+  border-radius: 20px;
+  border: none;
+  background: #020617;
+  color: white;
+  font-size: 14px;      /* lebih kecil */
+}
+
+
+/* ===== PASSWORD ===== */
+.password-wrapper {
+  position: relative;
+}
+
+.password-wrapper input {
+  padding-right: 4px;
+}
+
+.eye-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  font-size: 16px;
+  user-select: none;
+}
+
+/* ===== BUTTON ===== */
+.login-btn {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(to right, #14b8a6, #2563eb);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* ===== ROBOT ===== */
+.robot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.antenna {
+  width: 6px;
+  height: 16px;
+  background: #38bdf8;
+  border-radius: 4px;
+  margin-bottom: 6px;
+}
+
+.robot-face {
+  width: 90px;
+  height: 60px;
+  background: #020617;
+  border-radius: 14px;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  position: relative;
+}
+
+/* EYES */
+.eye {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #38bdf8;
+}
+
+/* DEAD */
+.robot.dead .eye {
+  background: transparent;
+  position: relative;
+}
+
+.robot.dead .eye::before,
+.robot.dead .eye::after {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 2px;
+  background: red;
+  top: 6px;
+}
+
+.robot.dead .eye::before { transform: rotate(45deg); }
+.robot.dead .eye::after { transform: rotate(-45deg); }
+
+/* ONE EYE */
+.robot.one-eye .right {
+  opacity: 0;
+}
+
+/* MOUTH */
+.mouth {
+  position: absolute;
+  bottom: 8px;
+  width: 24px;
+  height: 6px;
+  background: #94a3b8;
+  border-radius: 0 0 12px 12px;
+}
+
+/* LAUGH */
+.robot.happy .mouth {
+  height: 14px;
+  background: #38bdf8;
+  animation: laugh 0.3s infinite alternate;
+}
+
+@keyframes laugh {
+  from { width: 24px; }
+  to { width: 30px; }
+}

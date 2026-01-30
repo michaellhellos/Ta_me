@@ -1,0 +1,244 @@
+.dashboard {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #020617, #020617);
+  color: white;
+  padding-bottom: 80px;
+  font-family: Inter, sans-serif;
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #1e293b;
+}
+
+.header h1 {
+  color: #38bdf8;
+  font-size: 20px;
+}
+
+.header p {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  background: #1e293b;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Card */
+.card {
+  background: #0f172a;
+  margin: 16px;
+  padding: 16px;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.4);
+}
+
+/* Total Asset */
+.total-asset h2 {
+  margin: 10px 0;
+}
+
+.label {
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+.asset-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  margin-top: 6px;
+}
+
+/* Portfolio */
+.portfolio-item,
+.market-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #1e293b;
+}
+
+.portfolio-item:last-child,
+.market-item:last-child {
+  border-bottom: none;
+}
+
+/* Colors */
+.green {
+  color: #22c55e;
+}
+
+.red {
+  color: #ef4444;
+}
+
+/* Bottom Navigation */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #020617;
+  border-top: 1px solid #1e293b;
+  display: flex;
+  justify-content: space-around;
+  padding: 12px 0;
+  font-size: 12px;
+}
+
+.bottom-nav span {
+  opacity: 0.6;
+  cursor: pointer;
+}
+
+.bottom-nav .active {
+  color: #38bdf8;
+  opacity: 1;
+}
+/* CONTENT */
+.content {
+  max-width: 11000px;
+  margin: auto;
+  padding: auto;
+}
+
+/* ================= TOTAL ASSET ================= */
+.total-top h2 {
+  font-size: 28px;
+  font-weight: 600;
+  margin-top: 6px;
+}
+
+.asset-split {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 16px;
+  font-size: 14px;
+}
+
+.asset-split span {
+  opacity: 0.6;
+}
+
+/* ================= PORTFOLIO ================= */
+.portfolio-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid #1e293b;
+}
+
+.portfolio-item:last-child {
+  border-bottom: none;
+}
+
+.portfolio-item .left {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.portfolio-item .right {
+  text-align: right;
+}
+
+.portfolio-item strong {
+  font-size: 14px;
+}
+
+.portfolio-item p {
+  font-size: 12px;
+  opacity: 0.6;
+  margin-top: 2px;
+}
+
+/* ICON COIN */
+.coin {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: bold;
+}
+
+.coin.btc {
+  background: #f59e0b;
+}
+
+.coin.eth {
+  background: #6366f1;
+}
+
+/* ================= MARKET ================= */
+.market-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.market-header button {
+  background: #1e293b;
+  border: none;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.market-row {
+  display: grid;
+  grid-template-columns: 120px 1fr 120px;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid #1e293b;
+}
+
+.market-row:last-child {
+  border-bottom: none;
+}
+
+.market-row .left span {
+  display: block;
+  font-size: 12px;
+  opacity: 0.6;
+}
+
+.market-row .right {
+  text-align: right;
+  font-size: 14px;
+}
+
+/* SPARKLINE (AMAN, TIDAK UBAH BACKGROUND) */
+.chart {
+  height: 22px;
+  border-radius: 6px;
+  background: linear-gradient(
+    to right,
+    #22c55e,
+    #16a34a
+  );
+  opacity: 0.7;
+}
+
+/* WARNA */
+.green {
+  color: #22c55e;
+}
+
+.red {
+  color: #ef4444;
+}

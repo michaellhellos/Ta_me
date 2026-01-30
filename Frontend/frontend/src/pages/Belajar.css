@@ -1,0 +1,117 @@
+.belajar {
+  padding: 16px;
+  color: #fff;
+}
+
+/* HERO */
+.belajar-hero {
+  background: linear-gradient(135deg, #0bbcd6, #2563eb);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.belajar-hero h2 {
+  margin: 0;
+}
+
+.xp-box {
+  background: rgba(255, 255, 255, 0.15);
+  padding: 12px 16px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.xp-box strong {
+  font-size: 22px;
+}
+
+/* TAB */
+.belajar-tab {
+  display: flex;
+  background: #1f2937;
+  border-radius: 12px;
+  margin: 16px 0;
+  overflow: hidden;
+}
+
+.belajar-tab button {
+  flex: 1;
+  padding: 12px;
+  background: none;
+  border: none;
+  color: #aaa;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.belajar-tab button.active {
+  background: #111827;
+  color: #00e0ff;
+  font-weight: bold;
+}
+
+/* LIST */
+.belajar-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* CARD */
+.belajar-card {
+  background: #1f2937;
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.belajar-card h4 {
+  margin: 0 0 6px;
+}
+
+.belajar-card p {
+  margin: 0 0 8px;
+  color: #9ca3af;
+}
+
+.progress {
+  font-size: 12px;
+  color: #60a5fa;
+}
+
+/* MENTORING */
+.badge {
+  font-size: 12px;
+  color: #22c55e;
+}
+
+.badge.upcoming {
+  color: #facc15;
+}
+
+.join {
+  background: #ef4444;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+}
+
+.ingat {
+  background: #10b981;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+}
+
+.info {
+  font-size: 12px;
+  text-align: center;
+  color: #9ca3af;
+  margin-top: 12px;
+}
