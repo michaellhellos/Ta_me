@@ -1,27 +1,91 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   LineChart,
   Line,
   ResponsiveContainer,
   Tooltip,
+  XAxis,
 } from "recharts";
 import "./Simulasi.css";
 
-const chartData = [
-  { price: 69000 },
-  { price: 68500 },
-  { price: 69200 },
-  { price: 70100 },
-  { price: 69500 },
-  { price: 70200 },
-];
+/* ================= TYPES ================= */
+type Coin = {
+  id: string;
+  name: string;
+  symbol: string;
+  current_price: number;
+};
 
-const Simulasi = () => {
+type SimulasiProps = {
+  coin: Coin | null;
+};
+
+const Simulasi: React.FC<SimulasiProps> = ({ coin }) => {
   const [tab, setTab] = useState<"simulasi" | "riwayat">("simulasi");
+  const [coins, setCoins] = useState<Coin[]>([]);
+  const [selectedCoin, setSelectedCoin] = useState<Coin | null>(coin);
+  const [chartData, setChartData] = useState<any[]>([]);
+  const [loadingChart, setLoadingChart] = useState(false);
+
+  /* ================= AMBIL LIST COIN ================= */
+  useEffect(() => {
+    fetch("http://localhost:5000/api/crypto/coins")
+      .then((res) => res.json())
+      .then((data) => {
+        setCoins(data.data);
+        if (!selectedCoin) setSelectedCoin(data.data[0]);
+      });
+  }, []);
+
+  /* ================= UPDATE DARI DASHBOARD ================= */
+  useEffect(() => {
+    if (coin) setSelectedCoin(coin);
+  }, [coin]);
+
+  /* ================= CHART 3 HARI (ANTI BLANK) ================= */
+  useEffect(() => {
+    if (!selectedCoin) return;
+
+    setLoadingChart(true);
+
+    fetch(
+      `https://api.coingecko.com/api/v3/coins/${selectedCoin.id}/market_chart?vs_currency=usd&days=3`
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data.prices || data.prices.length === 0) {
+          setChartData([]);
+          return;
+        }
+
+        // Hitung interval supaya SELALU ADA DATA
+        const step = Math.floor(data.prices.length / 24) || 1;
+
+        const sampled = data.prices.filter(
+          (_: any, index: number) => index % step === 0
+        );
+
+        const formatted = sampled.map((p: any) => ({
+          time: new Date(p[0]).toLocaleTimeString("id-ID", {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+          price: p[1],
+        }));
+
+        setChartData(formatted);
+      })
+      .catch(console.error)
+      .finally(() => setLoadingChart(false));
+  }, [selectedCoin]);
+
+  if (!selectedCoin) {
+    return <p style={{ padding: 20 }}>Pilih coin terlebih dahulu</p>;
+  }
 
   return (
     <div className="sim-page">
-      {/* Tabs */}
+      {/* ================= TAB ================= */}
       <div className="sim-tabs">
         <span
           className={tab === "simulasi" ? "active" : ""}
@@ -39,35 +103,54 @@ const Simulasi = () => {
 
       {tab === "simulasi" && (
         <>
-          {/* Header */}
+          {/* ================= HEADER ================= */}
           <div className="sim-header">
-            <select>
-              <option>Bitcoin (BTC)</option>
-              <option>Ethereum (ETH)</option>
+            <select
+              value={selectedCoin.id}
+              onChange={(e) =>
+                setSelectedCoin(
+                  coins.find((c) => c.id === e.target.value) || null
+                )
+              }
+            >
+              {coins.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name} ({c.symbol.toUpperCase()})
+                </option>
+              ))}
             </select>
 
             <div className="price-box">
-              <span>Bitcoin</span>
-              <strong>$69,219.44</strong>
+              <span>{selectedCoin.name}</span>
+              <strong>
+                ${selectedCoin.current_price.toLocaleString()}
+              </strong>
             </div>
           </div>
 
-          {/* Chart */}
-          <div className="chart-wrapper">
-            <ResponsiveContainer width="100%" height={320}>
-              <LineChart data={chartData}>
-                <Tooltip />
-                <Line
-                  dataKey="price"
-                  stroke="#22e6a8"
-                  strokeWidth={2.5}
-                  dot={false}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+          {/* ================= CHART ================= */}
+          <div className="chart-wrapper" style={{ height: 320 }}>
+            {loadingChart ? (
+              <p style={{ textAlign: "center", paddingTop: 120 }}>
+                Loading chart...
+              </p>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={chartData}>
+                  <XAxis dataKey="time" />
+                  <Tooltip />
+                  <Line
+                    dataKey="price"
+                    stroke="#22e6a8"
+                    strokeWidth={2.5}
+                    dot={false}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            )}
           </div>
 
-          {/* Trade */}
+          {/* ================= TRADE ================= */}
           <div className="trade-panel">
             <div className="trade-switch">
               <button className="active">Beli</button>
@@ -77,7 +160,9 @@ const Simulasi = () => {
             <label>Jumlah (USD)</label>
             <input type="number" defaultValue={100} />
 
-            <button className="trade-btn">Beli BTC</button>
+            <button className="trade-btn">
+              Beli {selectedCoin.symbol.toUpperCase()}
+            </button>
           </div>
         </>
       )}

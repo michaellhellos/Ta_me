@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./Dashboard.css";
 import Simulasi from "./Simulasi";
 import Belajar from "./Belajar";
@@ -7,15 +7,32 @@ import Ai from "./Ai";
 
 type Menu = "beranda" | "simulasi" | "belajar" | "komunitas" | "ai";
 
-
-
-
 const Dashboard = () => {
   const [menu, setMenu] = useState<Menu>("beranda");
+  const [market, setMarket] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedCoin, setSelectedCoin] = useState<any>(null);
+
+  // AMBIL DATA CRYPTO DARI BACKEND
+  useEffect(() => {
+    fetch("http://localhost:5000/api/crypto/coins")
+      .then((res) => res.json())
+      .then((data) => {
+        setMarket(data.data);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
+
+  // KLIK COIN → PINDAH KE SIMULASI
+  const handleSelectCoin = (coin: any) => {
+    setSelectedCoin(coin);
+    setMenu("simulasi");
+  };
 
   return (
     <div className="dashboard">
-      {/* Header */}
+      {/* ================= HEADER ================= */}
       <header className="header">
         <div>
           <h1>Kripto-Z</h1>
@@ -27,13 +44,12 @@ const Dashboard = () => {
       {/* ================= CONTENT ================= */}
       {menu === "beranda" && (
         <div className="content">
-          {/* TOTAL ASSET */}
+          {/* ===== TOTAL ASSET ===== */}
           <section className="card total-asset">
             <div className="total-top">
               <p>Total Aset Virtual</p>
               <h2>
-                $15,271.27
-                <span className="green"> +52.71%</span>
+                $15,271.27 <span className="green">+52.71%</span>
               </h2>
             </div>
 
@@ -49,7 +65,7 @@ const Dashboard = () => {
             </div>
           </section>
 
-          {/* PORTFOLIO */}
+          {/* ===== PORTOFOLIO (TIDAK DIHAPUS) ===== */}
           <section className="card">
             <h3>Portofolio Kamu</h3>
 
@@ -82,45 +98,57 @@ const Dashboard = () => {
             </div>
           </section>
 
-          {/* MARKET */}
+          {/* ===== PASAR KRIPTO (BISA DIKLIK) ===== */}
           <section className="card">
             <div className="market-header">
               <h3>Pasar Kripto</h3>
               <button>Semua Aset</button>
             </div>
 
-            {[
-              ["BTC", "Bitcoin", "$54,214.18", "+1.38%", "green"],
-              ["ETH", "Ethereum", "$2,560.56", "+1.70%", "green"],
-              ["SOL", "Solana", "$166.20", "+1.20%", "green"],
-              ["ADA", "Cardano", "$0.85", "-2.32%", "red"],
-            ].map(([s, n, p, c, col]) => (
-              <div className="market-row" key={s}>
-                <div className="left">
-                  <strong>{s}</strong>
-                  <span>{n}</span>
-                </div>
+            {loading && <p>Loading data crypto...</p>}
 
-                <div className="chart" />
+            {!loading &&
+              market.map((coin) => (
+                <div
+                  key={coin.id}
+                  className="market-row clickable"
+                  onClick={() => handleSelectCoin(coin)}
+                >
+                  <div className="left">
+                    <strong>{coin.symbol.toUpperCase()}</strong>
+                    <span>{coin.name}</span>
+                  </div>
 
-                <div className="right">
-                  <strong>{p}</strong>
-                  <span className={col}>{c}</span>
+                  <div className="chart" />
+
+                  <div className="right">
+                    <strong>
+                      ${coin.current_price.toLocaleString()}
+                    </strong>
+                    <span
+                      className={
+                        coin.price_change_percentage_24h >= 0
+                          ? "green"
+                          : "red"
+                      }
+                    >
+                      {coin.price_change_percentage_24h.toFixed(2)}%
+                    </span>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
           </section>
         </div>
       )}
 
+      {/* ================= SIMULASI ================= */}
+      {menu === "simulasi" && (
+        <Simulasi coin={selectedCoin} />
+      )}
 
-      {menu === "simulasi" && <Simulasi />}
       {menu === "belajar" && <Belajar />}
       {menu === "komunitas" && <Komunitas />}
       {menu === "ai" && <Ai />}
-
-
-
 
       {/* ================= BOTTOM NAV ================= */}
       <nav className="bottom-nav">
@@ -158,7 +186,6 @@ const Dashboard = () => {
         >
           🤖 AI Mentor
         </span>
-
       </nav>
     </div>
   );
