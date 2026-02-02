@@ -14,6 +14,7 @@ const Login: React.FC<LoginProps> = ({
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -21,31 +22,40 @@ const Login: React.FC<LoginProps> = ({
       return;
     }
 
+    setLoading(true);
+    setMessage("");
+
     try {
-      const response = await fetch("http://localhost:5000/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          email,
-          password
-        })
-      });
+      const response = await fetch(
+        "http://localhost:5000/api/auth/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ email, password })
+        }
+      );
 
       const data = await response.json();
 
       if (!response.ok) {
-        setMessage(data.message);
+        setMessage(data.message || "Login gagal");
+        setLoading(false);
         return;
       }
 
-      // ✅ LOGIN BERHASIL
+      // ✅ SIMPAN TOKEN & USER
+      localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
+
+      // ✅ PINDAH KE DASHBOARD
       goToDashboard();
 
     } catch (error) {
       setMessage("Gagal terhubung ke server");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -68,8 +78,8 @@ const Login: React.FC<LoginProps> = ({
 
         <label>Email</label>
         <input
-          type="text"
-          placeholder="admin@admin.com"
+          type="email"
+          placeholder="user@email.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
@@ -85,7 +95,7 @@ const Login: React.FC<LoginProps> = ({
 
           <span
             className="eye-toggle"
-            onClick={() => setPasswordVisible(prev => !prev)}
+            onClick={() => setPasswordVisible((prev) => !prev)}
           >
             {passwordVisible ? "🙈" : "👁"}
           </span>
@@ -93,9 +103,12 @@ const Login: React.FC<LoginProps> = ({
 
         {message && <p style={{ color: "red" }}>{message}</p>}
 
-        {/* ✅ LOGIN KE BACKEND */}
-        <button className="login-btn" onClick={handleLogin}>
-          Masuk ⚡
+        <button
+          className="login-btn"
+          onClick={handleLogin}
+          disabled={loading}
+        >
+          {loading ? "Masuk..." : "Masuk ⚡"}
         </button>
 
         <p className="register">

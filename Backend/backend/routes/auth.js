@@ -1,7 +1,7 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const User = require("../models/user");
-
+const jwt = require("jsonwebtoken");
 const router = express.Router();
 
 /* ========== REGISTER ========== */
@@ -37,10 +37,10 @@ router.post("/register", async (req, res) => {
 
 /* ========== LOGIN ========== */
 router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password } = req.body || {};
 
   if (!email || !password) {
-    return res.status(400).json({ message: "Data tidak lengkap" });
+    return res.status(400).json({ message: "Email dan password wajib diisi" });
   }
 
   try {
@@ -54,18 +54,23 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Password salah" });
     }
 
-    res.json({
-      message: "Login berhasil",
+    const token = jwt.sign(
+      { id: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    );
+
+    res.status(200).json({
+      token,
       user: {
         id: user._id,
         name: user.name,
         email: user.email
       }
     });
-  } catch (error) {
+  } catch (err) {
+    console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 });
-
-
 module.exports = router;

@@ -13,18 +13,76 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [selectedCoin, setSelectedCoin] = useState<any>(null);
 
-  // AMBIL DATA CRYPTO DARI BACKEND
+  const [balance, setBalance] = useState(0);
+  const [portfolio, setPortfolio] = useState<any[]>([]);
+
+  // ================= AMBIL DATA =================
   useEffect(() => {
-    fetch("http://localhost:5000/api/crypto/coins")
-      .then((res) => res.json())
-      .then((data) => {
-        setMarket(data.data);
+    const fetchData = async () => {
+      try {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+          console.error("Token tidak ditemukan, silakan login ulang");
+          return;
+        }
+
+        const [coinRes, userRes] = await Promise.all([
+          fetch("http://localhost:5000/api/crypto/coins"),
+          fetch("http://localhost:5000/api/user/me", {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          })
+        ]);
+
+        const coinData = await coinRes.json();
+        const userData = await userRes.json();
+
+        if (!userRes.ok) {
+          throw new Error(userData.message || "Gagal mengambil data user");
+        }
+
+        setMarket(coinData.data);
+        setBalance(userData.balance);
+        setPortfolio(userData.portfolio);
+      } catch (err) {
+        console.error("Dashboard error:", err);
+      } finally {
         setLoading(false);
-      })
-      .catch(() => setLoading(false));
+      }
+    };
+
+    fetchData();
   }, []);
 
-  // KLIK COIN → PINDAH KE SIMULASI
+  // ================= HITUNG PORTOFOLIO =================
+  const portfolioWithPrice = portfolio.map((item) => {
+    const marketCoin = market.find(
+      (c) => c.symbol.toUpperCase() === item.symbol
+    );
+
+    const currentPrice = marketCoin?.current_price || item.price;
+    const totalValue = item.quantity * currentPrice;
+    const profitPercent =
+      ((currentPrice - item.price) / item.price) * 100;
+
+    return {
+      ...item,
+      currentPrice,
+      totalValue,
+      profitPercent
+    };
+  });
+
+  const cryptoValue = portfolioWithPrice.reduce(
+    (sum, item) => sum + item.totalValue,
+    0
+  );
+
+  const totalAsset = balance + cryptoValue;
+
+  // ================= UI =================
   const handleSelectCoin = (coin: any) => {
     setSelectedCoin(coin);
     setMenu("simulasi");
@@ -36,74 +94,74 @@ const Dashboard = () => {
       <header className="header">
         <div>
           <h1>Kripto-Z</h1>
-          <p>Level 5 • Streak 🔥 3 Hari</p>
+          <p>Simulasi Trading • Virtual Money</p>
         </div>
         <div className="avatar">👤</div>
       </header>
 
-      {/* ================= CONTENT ================= */}
+      {/* ================= BERANDA ================= */}
       {menu === "beranda" && (
         <div className="content">
           {/* ===== TOTAL ASSET ===== */}
           <section className="card total-asset">
             <div className="total-top">
               <p>Total Aset Virtual</p>
-              <h2>
-                $15,271.27 <span className="green">+52.71%</span>
-              </h2>
+              <h2>${totalAsset.toLocaleString()}</h2>
             </div>
 
             <div className="asset-split">
               <div>
-                <span>Uang Virtual (Cash)</span>
-                <strong>$10,000.00</strong>
+                <span>Uang Virtual</span>
+                <strong>${balance.toLocaleString()}</strong>
               </div>
               <div>
-                <span>Nilai Aset Kripto</span>
-                <strong>$5,271.27</strong>
+                <span>Aset Kripto</span>
+                <strong>${cryptoValue.toLocaleString()}</strong>
               </div>
             </div>
           </section>
 
-          {/* ===== PORTOFOLIO (TIDAK DIHAPUS) ===== */}
+          {/* ===== PORTOFOLIO ===== */}
           <section className="card">
             <h3>Portofolio Kamu</h3>
 
-            <div className="portfolio-item">
-              <div className="left">
-                <span className="coin btc">₿</span>
-                <div>
-                  <strong>Bitcoin</strong>
-                  <p>0.0500 BTC</p>
-                </div>
-              </div>
-              <div className="right">
-                <strong>$2,710.71</strong>
-                <span className="green">+$54.24</span>
-              </div>
-            </div>
+            {portfolioWithPrice.length === 0 && (
+              <p className="empty">
+                Kamu belum membeli kripto 🚀
+              </p>
+            )}
 
-            <div className="portfolio-item">
-              <div className="left">
-                <span className="coin eth">◆</span>
-                <div>
-                  <strong>Ethereum</strong>
-                  <p>1.0000 ETH</p>
+            {portfolioWithPrice.map((item) => (
+              <div key={item.symbol} className="portfolio-item">
+                <div className="left">
+                  <span className="coin">{item.symbol[0]}</span>
+                  <div>
+                    <strong>{item.name}</strong>
+                    <p>
+                      {item.quantity} {item.symbol}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="right">
+                  <strong>
+                    ${item.totalValue.toLocaleString()}
+                  </strong>
+                  <span
+                    className={
+                      item.profitPercent >= 0 ? "green" : "red"
+                    }
+                  >
+                    {item.profitPercent.toFixed(2)}%
+                  </span>
                 </div>
               </div>
-              <div className="right">
-                <strong>$2,560.56</strong>
-                <span className="green">+$32.11</span>
-              </div>
-            </div>
+            ))}
           </section>
 
-          {/* ===== PASAR KRIPTO (BISA DIKLIK) ===== */}
+          {/* ===== MARKET ===== */}
           <section className="card">
-            <div className="market-header">
-              <h3>Pasar Kripto</h3>
-              <button>Semua Aset</button>
-            </div>
+            <h3>Pasar Kripto</h3>
 
             {loading && <p>Loading data crypto...</p>}
 
@@ -118,8 +176,6 @@ const Dashboard = () => {
                     <strong>{coin.symbol.toUpperCase()}</strong>
                     <span>{coin.name}</span>
                   </div>
-
-                  <div className="chart" />
 
                   <div className="right">
                     <strong>
@@ -141,51 +197,25 @@ const Dashboard = () => {
         </div>
       )}
 
-      {/* ================= SIMULASI ================= */}
-      {menu === "simulasi" && (
-        <Simulasi coin={selectedCoin} />
-      )}
-
+      {/* ================= MENU ================= */}
+      {menu === "simulasi" && <Simulasi coin={selectedCoin} />}
       {menu === "belajar" && <Belajar />}
       {menu === "komunitas" && <Komunitas />}
       {menu === "ai" && <Ai />}
 
-      {/* ================= BOTTOM NAV ================= */}
+      {/* ================= NAV ================= */}
       <nav className="bottom-nav">
-        <span
-          className={menu === "beranda" ? "active" : ""}
-          onClick={() => setMenu("beranda")}
-        >
-          🏠 Beranda
-        </span>
-
-        <span
-          className={menu === "simulasi" ? "active" : ""}
-          onClick={() => setMenu("simulasi")}
-        >
-          📈 Simulasi
-        </span>
-
-        <span
-          className={menu === "belajar" ? "active" : ""}
-          onClick={() => setMenu("belajar")}
-        >
-          📚 Belajar
-        </span>
-
-        <span
-          className={menu === "komunitas" ? "active" : ""}
-          onClick={() => setMenu("komunitas")}
-        >
-          👥 Komunitas
-        </span>
-
-        <span
-          className={menu === "ai" ? "active" : ""}
-          onClick={() => setMenu("ai")}
-        >
-          🤖 AI Mentor
-        </span>
+        {["beranda", "simulasi", "belajar", "komunitas", "ai"].map(
+          (m) => (
+            <span
+              key={m}
+              className={menu === m ? "active" : ""}
+              onClick={() => setMenu(m as Menu)}
+            >
+              {m}
+            </span>
+          )
+        )}
       </nav>
     </div>
   );
