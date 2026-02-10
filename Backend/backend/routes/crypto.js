@@ -2,7 +2,7 @@ const express = require("express");
 const axios = require("axios");
 
 const router = express.Router();
-
+const chartCache = {};
 // 15 COIN
 const COINS = [
   "bitcoin",
@@ -77,6 +77,45 @@ router.get("/chart/:id", async (req, res) => {
         }),
         price: p[1]
       }));
+
+    res.json({ prices: formatted });
+  } catch (error) {
+    console.error("CHART ERROR:", error.message);
+    res.status(500).json({ prices: [] });
+  }
+});
+router.get("/chart/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // 👉 CEK CACHE
+    if (chartCache[id]) {
+      return res.json({ prices: chartCache[id] });
+    }
+
+    // 👉 HIT COINGECKO SEKALI
+    const response = await axios.get(
+      `https://api.coingecko.com/api/v3/coins/${id}/market_chart`,
+      {
+        params: {
+          vs_currency: "usd",
+          days: 3
+        }
+      }
+    );
+
+    const formatted = response.data.prices
+      .filter((_, i) => i % 10 === 0)
+      .map((p) => ({
+        time: new Date(p[0]).toLocaleTimeString("id-ID", {
+          hour: "2-digit",
+          minute: "2-digit"
+        }),
+        price: p[1]
+      }));
+
+    // 👉 SIMPAN KE CACHE
+    chartCache[id] = formatted;
 
     res.json({ prices: formatted });
   } catch (error) {
