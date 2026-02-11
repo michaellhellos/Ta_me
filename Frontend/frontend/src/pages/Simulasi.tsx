@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+// export default Simulasi;
+import { useEffect, useState, useCallback } from "react";
 import {
   LineChart,
   Line,
@@ -22,7 +23,7 @@ type ChartPoint = {
 };
 
 type Transaction = {
-  type: string;
+  type: "BUY" | "SELL";
   name: string;
   price: number;
   quantity: number;
@@ -30,8 +31,10 @@ type Transaction = {
 };
 
 type SimulasiProps = {
-  coin: Coin | null;
+  coin?: Coin | null;
 };
+
+const API = "http://localhost:5000/api/trade";
 
 const Simulasi: React.FC<SimulasiProps> = ({ coin }) => {
   const [tab, setTab] = useState<"simulasi" | "riwayat">("simulasi");
@@ -42,89 +45,123 @@ const Simulasi: React.FC<SimulasiProps> = ({ coin }) => {
 
   const [chartData, setChartData] = useState<ChartPoint[]>([]);
   const [loadingChart, setLoadingChart] = useState(false);
+  const [loadingTrade, setLoadingTrade] = useState(false);
 
-  const [amount, setAmount] = useState(100);
+  const [amount, setAmount] = useState<number>(100);
   const [history, setHistory] = useState<Transaction[]>([]);
 
   /* ================= FETCH COINS ================= */
   useEffect(() => {
-    fetch("http://localhost:5000/api/crypto/coins")
+    fetch(`${API}/coins`)
       .then((res) => res.json())
       .then((json) => {
-        if (json.success) {
+        if (json.success && json.data?.length) {
           setCoins(json.data);
           setSelectedCoin(coin ?? json.data[0]);
         }
       })
-      .catch(console.error);
-  }, []);
+      .catch(() => alert("Gagal mengambil data coin"));
+  }, [coin]);
 
   /* ================= FETCH CHART ================= */
   useEffect(() => {
     if (!selectedCoin) return;
 
     setLoadingChart(true);
-
-    fetch(`http://localhost:5000/api/crypto/chart/${selectedCoin.id}`)
+    fetch(`${API}/chart/${selectedCoin.id}`)
       .then((res) => res.json())
-      .then((data) => setChartData(data.prices || []))
+      .then((data) => setChartData(data.prices ?? []))
       .finally(() => setLoadingChart(false));
   }, [selectedCoin]);
 
-  /* ================= FETCH HISTORY ================= */
-  useEffect(() => {
-    if (tab !== "riwayat") return;
-
+  /* ================= FETCH HISTORY (REUSABLE) ================= */
+  const fetchHistory = useCallback(async () => {
     const token = localStorage.getItem("token");
+    if (!token) return;
 
-    fetch("http://localhost:5000/api/trade/history", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => res.json())
-      .then((data) => setHistory(data.transactions || []))
-      .catch(console.error);
-  }, [tab]);
+    try {
+      const res = await fetch(`${API}/history`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const data = await res.json();
+
+      setHistory(
+        data.transactions ||
+          data.data ||
+          data.user?.transactions ||
+          []
+      );
+    } catch {
+      alert("Gagal mengambil riwayat transaksi");
+    }
+  }, []);
+
+  /* ================= FETCH HISTORY WHEN TAB CHANGED ================= */
+  useEffect(() => {
+    if (tab === "riwayat") {
+      fetchHistory();
+    }
+  }, [tab, fetchHistory]);
 
   /* ================= BUY / SELL ================= */
   const handleTrade = async () => {
-    if (!selectedCoin) return;
+    if (!selectedCoin || loadingTrade) return;
+
+    if (amount <= 0 || isNaN(amount)) {
+      alert("Jumlah tidak valid");
+      return;
+    }
 
     const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Silakan login ulang");
+      return;
+    }
 
-    const quantity = amount / selectedCoin.current_price;
-
-    const url =
+    const quantity =
       mode === "buy"
-        ? "http://localhost:5000/api/trade/buy"
-        : "http://localhost:5000/api/trade/sell";
+        ? amount / selectedCoin.current_price
+        : amount;
 
-    const body =
-      mode === "buy"
-        ? { coinId: selectedCoin.id, amount }
-        : { coinId: selectedCoin.id, quantity };
+    setLoadingTrade(true);
 
-    const res = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(body),
-    });
+    try {
+      const res = await fetch(
+        `${API}/${mode}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            coinId: selectedCoin.id,
+            quantity,
+          }),
+        }
+      );
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (!res.ok) {
-      alert(data.message);
-    } else {
-      alert(mode === "buy" ? "Berhasil membeli!" : "Berhasil menjual!");
-      setTab("riwayat");
+      if (!res.ok) {
+        alert(data.message || "Transaksi gagal");
+      } else {
+        alert(mode === "buy" ? "Berhasil membeli!" : "Berhasil menjual!");
+        setAmount(100);
+        setTab("riwayat");
+        await fetchHistory(); // 🔥 PENTING
+      }
+    } catch {
+      alert("Server error");
+    } finally {
+      setLoadingTrade(false);
     }
   };
 
   if (!selectedCoin) return <p>Loading...</p>;
 
-  const quantity = amount / selectedCoin.current_price;
+  const estimatedQty = amount / selectedCoin.current_price;
 
   return (
     <div className="sim-page">
@@ -146,7 +183,7 @@ const Simulasi: React.FC<SimulasiProps> = ({ coin }) => {
 
       {tab === "simulasi" && (
         <>
-          {/* ================= HEADER ================= */}
+          {/* HEADER */}
           <div className="sim-header">
             <select
               value={selectedCoin.id}
@@ -165,11 +202,13 @@ const Simulasi: React.FC<SimulasiProps> = ({ coin }) => {
 
             <div className="price-box">
               <span>{selectedCoin.name}</span>
-              <strong>${selectedCoin.current_price.toLocaleString()}</strong>
+              <strong>
+                ${selectedCoin.current_price.toLocaleString()}
+              </strong>
             </div>
           </div>
 
-          {/* ================= CHART ================= */}
+          {/* CHART */}
           <div className="chart-wrapper" style={{ height: 320 }}>
             {loadingChart ? (
               <p>Loading chart...</p>
@@ -184,7 +223,7 @@ const Simulasi: React.FC<SimulasiProps> = ({ coin }) => {
             )}
           </div>
 
-          {/* ================= BUY / SELL TOGGLE ================= */}
+          {/* BUY / SELL */}
           <div className="trade-switch">
             <button
               className={mode === "buy" ? "active" : ""}
@@ -200,25 +239,31 @@ const Simulasi: React.FC<SimulasiProps> = ({ coin }) => {
             </button>
           </div>
 
-          {/* ================= TRADE PANEL ================= */}
           <div className="trade-panel">
-            <label>Jumlah (USD)</label>
+            <label>{mode === "buy" ? "Jumlah (USD)" : "Jumlah Coin"}</label>
+
             <input
               type="number"
-              min={1}
+              min={0.000001}
               value={amount}
               onChange={(e) => setAmount(Number(e.target.value))}
             />
 
-            <small>
-              ≈ {quantity.toFixed(6)} {selectedCoin.symbol.toUpperCase()}
-            </small>
+            {mode === "buy" && (
+              <small>
+                ≈ {estimatedQty.toFixed(6)}{" "}
+                {selectedCoin.symbol.toUpperCase()}
+              </small>
+            )}
 
             <button
+              disabled={loadingTrade}
               className={`trade-btn ${mode === "sell" ? "sell" : ""}`}
               onClick={handleTrade}
             >
-              {mode === "buy"
+              {loadingTrade
+                ? "Processing..."
+                : mode === "buy"
                 ? `Beli ${selectedCoin.symbol.toUpperCase()}`
                 : `Jual ${selectedCoin.symbol.toUpperCase()}`}
             </button>
@@ -232,9 +277,12 @@ const Simulasi: React.FC<SimulasiProps> = ({ coin }) => {
 
           {history.map((tx, i) => (
             <div key={i} className="riwayat-item">
-              <strong>{tx.type}</strong> {tx.name} <br />
-              Qty: {tx.quantity.toFixed(6)} <br />
-              Harga: ${tx.price.toLocaleString()} <br />
+              <strong>{tx.type}</strong> {tx.name}
+              <br />
+              Qty: {tx.quantity.toFixed(6)}
+              <br />
+              Harga: ${tx.price.toLocaleString()}
+              <br />
               Total: ${tx.total.toLocaleString()}
             </div>
           ))}
