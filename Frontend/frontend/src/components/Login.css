@@ -1,174 +1,184 @@
-/* ===== BACKGROUND ===== */
+/* =========================
+   GLOBAL RESET
+========================= */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Segoe UI", sans-serif;
+}
+
+/* =========================
+   BACKGROUND
+========================= */
 .container {
   min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
 
-  background: linear-gradient(
-    120deg,
-    #22d3ee,
-    #0ea5e9,
-    #6366f1,
-    #020617
-  );
-  background-size: 400% 400%;
-  animation: bgMove 14s ease infinite;
+  background: linear-gradient(135deg, #0f172a, #1e3a8a, #0f172a);
+  padding: 20px;
 }
 
-@keyframes bgMove {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-/* ===== CARD ===== */
+/* =========================
+   CARD
+========================= */
 .card {
-  width: 340px;
-  padding: 30px;
+  width: 100%;
+  max-width: 420px;   /* INI YANG BIKIN GA MELEBAR */
+  background: rgba(15, 23, 42, 0.95);
   border-radius: 18px;
-  background: rgba(2, 6, 23, 0.88);
-  box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+  padding: 40px 35px;
+
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
   color: white;
+
+  animation: fadeIn 0.6s ease;
 }
 
-/* ===== TEXT ===== */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* =========================
+   TITLE
+========================= */
 h1 {
   text-align: center;
-  color: #38bdf8;
+  font-size: 26px;
+  margin-bottom: 6px;
+  background: linear-gradient(to right, #38bdf8, #6366f1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .subtitle {
   text-align: center;
-  font-size: 14px;
-  opacity: 0.8;
-  margin-bottom: 24px;
+  font-size: 13px;
+  opacity: 0.7;
+  margin-bottom: 30px;
 }
 
+/* =========================
+   FORM
+========================= */
 label {
+  display: block;
   font-size: 13px;
+  margin-bottom: 6px;
   opacity: 0.8;
 }
 
 input {
   width: 100%;
-  padding: 10px 14px;   /* lebih tipis */
-  border-radius: 20px;
-  border: none;
-  background: #020617;
+  padding: 13px 15px;
+  margin-bottom: 20px;
+
+  border-radius: 12px;
+  border: 1px solid #334155;
+
+  background: #0f172a;
   color: white;
-  font-size: 14px;      /* lebih kecil */
+  font-size: 14px;
+
+  transition: 0.3s;
 }
 
+input:focus {
+  outline: none;
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 3px rgba(56,189,248,0.2);
+}
 
-/* ===== PASSWORD ===== */
+/* =========================
+   PASSWORD
+========================= */
 .password-wrapper {
   position: relative;
 }
 
 .password-wrapper input {
-  padding-right: 4px;
+  padding-right: 45px;
 }
 
-.eye-toggle {
+.password-wrapper span {
   position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
+  right: 15px;
+  top: 40px;
   cursor: pointer;
-  font-size: 16px;
-  user-select: none;
+  opacity: 0.7;
+  transition: 0.2s;
 }
 
-/* ===== BUTTON ===== */
-.login-btn {
+.password-wrapper span:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* =========================
+   ERROR
+========================= */
+.card p[style] {
+  font-size: 13px;
+  margin-bottom: 15px;
+}
+
+/* =========================
+   BUTTON
+========================= */
+button {
   width: 100%;
-  padding: 12px;
-  background: linear-gradient(to right, #14b8a6, #2563eb);
+  padding: 14px;
+
   border: none;
   border-radius: 12px;
+
+  background: linear-gradient(90deg, #14b8a6, #38bdf8);
   color: white;
-  font-weight: bold;
+
+  font-size: 15px;
+  font-weight: 600;
+
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(37,99,235,0.4);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* =========================
+   REGISTER LINK
+========================= */
+.card > p:last-child {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+.card > p:last-child span {
+  color: #38bdf8;
   cursor: pointer;
 }
 
-/* ===== ROBOT ===== */
-.robot {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 20px;
+.card > p:last-child span:hover {
+  text-decoration: underline;
 }
 
-.antenna {
-  width: 6px;
-  height: 16px;
-  background: #38bdf8;
-  border-radius: 4px;
-  margin-bottom: 6px;
-}
-
-.robot-face {
-  width: 90px;
-  height: 60px;
-  background: #020617;
-  border-radius: 14px;
-  display: flex;
-  justify-content: space-evenly;
-  align-items: center;
-  position: relative;
-}
-
-/* EYES */
-.eye {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: #38bdf8;
-}
-
-/* DEAD */
-.robot.dead .eye {
-  background: transparent;
-  position: relative;
-}
-
-.robot.dead .eye::before,
-.robot.dead .eye::after {
-  content: "";
-  position: absolute;
-  width: 14px;
-  height: 2px;
-  background: red;
-  top: 6px;
-}
-
-.robot.dead .eye::before { transform: rotate(45deg); }
-.robot.dead .eye::after { transform: rotate(-45deg); }
-
-/* ONE EYE */
-.robot.one-eye .right {
-  opacity: 0;
-}
-
-/* MOUTH */
-.mouth {
-  position: absolute;
-  bottom: 8px;
-  width: 24px;
-  height: 6px;
-  background: #94a3b8;
-  border-radius: 0 0 12px 12px;
-}
-
-/* LAUGH */
-.robot.happy .mouth {
-  height: 14px;
-  background: #38bdf8;
-  animation: laugh 0.3s infinite alternate;
-}
-
-@keyframes laugh {
-  from { width: 24px; }
-  to { width: 30px; }
+/* =========================
+   RESPONSIVE
+========================= */
+@media (max-width: 480px) {
+  .card {
+    padding: 30px 25px;
+  }
 }

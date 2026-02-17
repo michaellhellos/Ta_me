@@ -1,30 +1,59 @@
-import { useState } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./components/Login";
 import Register from "./components/Register";
 import Dashboard from "./pages/Dashboard";
+import DashboardAdmin from "./pages/admin/DashboardAdmin";
 
-type Page = "login" | "register" | "dashboard";
+// Protect route berdasarkan login
+const PrivateRoute = ({ children }: { children: JSX.Element }) => {
+  const token = localStorage.getItem("token");
+  return token ? children : <Navigate to="/" />;
+};
+
+// Protect route khusus admin
+const AdminRoute = ({ children }: { children: JSX.Element }) => {
+  const user = localStorage.getItem("user");
+
+  if (!user) return <Navigate to="/" />;
+
+  const parsedUser = JSON.parse(user);
+
+  return parsedUser.role === "admin"
+    ? children
+    : <Navigate to="/dashboard" />;
+};
 
 function App() {
-  const [page, setPage] = useState<Page>("login");
-
   return (
-    <>
-      {page === "login" && (
-        <Login
-          goToRegister={() => setPage("register")}
-          goToDashboard={() => setPage("dashboard")}
+    <Router>
+      <Routes>
+
+        {/* PUBLIC */}
+        <Route path="/" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+
+        {/* USER DASHBOARD */}
+        <Route
+          path="/dashboard"
+          element={
+            <PrivateRoute>
+              <Dashboard />
+            </PrivateRoute>
+          }
         />
-      )}
 
-      {page === "register" && (
-        <Register goToLogin={() => setPage("login")} />
-      )}
+        {/* ADMIN DASHBOARD */}
+        <Route
+          path="/admin/dashboard"
+          element={
+            <AdminRoute>
+              <DashboardAdmin />
+            </AdminRoute>
+          }
+        />
 
-      {page === "dashboard" && (
-        <Dashboard logout={() => setPage("login")} />
-      )}
-    </>
+      </Routes>
+    </Router>
   );
 }
 

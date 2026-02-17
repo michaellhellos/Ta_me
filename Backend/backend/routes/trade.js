@@ -366,8 +366,10 @@ router.get("/coins", async (req, res) => {
     });
 
     coinsCache = { data: response.data, time: Date.now() };
+
     res.json({ success: true, data: response.data });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ success: false, data: [] });
   }
 });
@@ -396,8 +398,10 @@ router.get("/chart/:id", async (req, res) => {
     }));
 
     chartCache[req.params.id] = { data, time: Date.now() };
+
     res.json({ prices: data });
-  } catch {
+  } catch (err) {
+    console.error(err);
     res.json({ prices: [] });
   }
 });
@@ -407,7 +411,9 @@ router.get("/chart/:id", async (req, res) => {
 ========================= */
 async function getCoinPrice(id) {
   const cached = priceCache[id];
-  if (cached && Date.now() - cached.time < PRICE_TTL) return cached.data;
+  if (cached && Date.now() - cached.time < PRICE_TTL) {
+    return cached.data;
+  }
 
   const res = await axiosCG.get("/coins/markets", {
     params: { vs_currency: "usd", ids: id }
@@ -416,6 +422,7 @@ async function getCoinPrice(id) {
   if (!res.data.length) return null;
 
   priceCache[id] = { data: res.data[0], time: Date.now() };
+
   return res.data[0];
 }
 
@@ -426,17 +433,23 @@ router.post("/buy", auth, async (req, res) => {
   try {
     const qty = Number(req.body.quantity);
     const coinId = req.body.coinId;
+
     if (!coinId || qty <= 0) {
       return res.status(400).json({ message: "Quantity tidak valid" });
     }
 
-    const user = await User.findById(req.userId);
-    if (!user) return res.status(404).json({ message: "User tidak ditemukan" });
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: "User tidak ditemukan" });
+    }
 
     const coin = await getCoinPrice(coinId);
-    if (!coin) return res.status(400).json({ message: "Coin tidak ditemukan" });
+    if (!coin) {
+      return res.status(400).json({ message: "Coin tidak ditemukan" });
+    }
 
     const total = coin.current_price * qty;
+
     if (user.balance < total) {
       return res.status(400).json({ message: "Saldo tidak cukup" });
     }
@@ -474,7 +487,8 @@ router.post("/buy", auth, async (req, res) => {
       });
     }
 
-    res.json({ success: true });
+    res.json({ success: true, message: "Berhasil membeli coin" });
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
@@ -489,8 +503,12 @@ router.post("/sell", auth, async (req, res) => {
     const qty = Number(req.body.quantity);
     const coinId = req.body.coinId;
 
+    if (!coinId || qty <= 0) {
+      return res.status(400).json({ message: "Quantity tidak valid" });
+    }
+
     const portfolio = await Portfolio.findOne({
-      userId: req.userId,
+      userId: req.user.id,
       coinId
     });
 
@@ -499,16 +517,21 @@ router.post("/sell", auth, async (req, res) => {
     }
 
     const coin = await getCoinPrice(coinId);
+    if (!coin) {
+      return res.status(400).json({ message: "Coin tidak ditemukan" });
+    }
+
     const total = coin.current_price * qty;
 
     portfolio.quantity -= qty;
+
     if (portfolio.quantity <= 0) {
       await portfolio.deleteOne();
     } else {
       await portfolio.save();
     }
 
-    const user = await User.findById(req.userId);
+    const user = await User.findById(req.user.id);
     user.balance += total;
     await user.save();
 
@@ -522,8 +545,10 @@ router.post("/sell", auth, async (req, res) => {
       total
     });
 
-    res.json({ success: true });
-  } catch {
+    res.json({ success: true, message: "Berhasil menjual coin" });
+
+  } catch (err) {
+    console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 });
@@ -532,10 +557,16 @@ router.post("/sell", auth, async (req, res) => {
    HISTORY
 ========================= */
 router.get("/history", auth, async (req, res) => {
-  const data = await Transaction.find({ userId: req.userId })
-    .sort({ createdAt: -1 });
+  try {
+    const data = await Transaction.find({ userId: req.user.id })
+      .sort({ createdAt: -1 });
 
-  res.json({ success: true, transactions: data });
+    res.json({ success: true, transactions: data });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
 });
 
 module.exports = router;
+

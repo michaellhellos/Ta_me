@@ -1,0 +1,116 @@
+.harga-container {
+  display: flex;
+  height: 100vh;
+  background: linear-gradient(90deg, #0f172a, #0b1b33);
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+/* SIDEBAR */
+.sidebar {
+  width: 240px;
+  background: #111827;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.logo {
+  color: #38bdf8;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar li {
+  padding: 12px;
+  cursor: pointer;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.sidebar li:hover {
+  background: #1f2937;
+}
+
+.sidebar .active {
+  background: #0ea5e9;
+}
+
+.logout-btn {
+  background: #7f1d1d;
+  border: none;
+  padding: 10px;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* MAIN */
+.main {
+  flex: 1;
+  padding: 30px;
+}
+
+.table-box {
+  margin-top: 20px;
+  background: #1e293b;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead {
+  background: #334155;
+}
+
+th, td {
+  padding: 14px;
+  text-align: left;
+}
+
+tr {
+  border-bottom: 1px solid #334155;
+}
+
+.green {
+  color: #22c55e;
+}
+
+.red {
+  color: #ef4444;
+}
+
+.pump-btn {
+  background: #166534;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  margin-right: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.dump-btn {
+  background: #7f1d1d;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.system-info {
+  position: absolute;
+  right: 20px;
+  top: 120px;
+  font-size: 14px;
+  opacity: 0.8;
+}
