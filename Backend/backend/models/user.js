@@ -14,7 +14,11 @@ const userSchema = new mongoose.Schema({
   balance: {
     type: Number,
     default: 1000000
-  }
+  },
+  specialization: String,
+  bio: String,
+  experience: Number,
+  style: String
 });
 
 module.exports = mongoose.model("User", userSchema);
