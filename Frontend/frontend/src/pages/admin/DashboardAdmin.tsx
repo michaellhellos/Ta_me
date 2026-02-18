@@ -3,7 +3,8 @@ import "./DashboardAdmin.css";
 import { Line } from "react-chartjs-2";
 import KontenEdukasi from "./KontenEdukasi";
 import HargaAsset from "./HargaAsset"; // <-- IMPORT INI
-import User from "./user"; // <-- IMPORT INI  
+import User from "./User"; // <-- IMPORT INI  
+import Mentor from "./Mentor"; // <-- IMPORT INI
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -15,7 +16,7 @@ import {
   Legend
 } from "chart.js";
 
-ChartJS.register(
+ChartJS.register( 
   CategoryScale,
   LinearScale,
   PointElement,
@@ -25,7 +26,7 @@ ChartJS.register(
   Legend
 );
 
-type Menu = "beranda" | "edukasi" | "harga" | "user";
+type Menu = "beranda" | "edukasi" | "harga" | "user"| "mentor";
 
 const DashboardAdmin: React.FC = () => {
   const [menu, setMenu] = useState<Menu>("beranda");
@@ -75,6 +76,12 @@ const DashboardAdmin: React.FC = () => {
             onClick={() => setMenu("user")}
           >
             💰Data Pengguna
+          </li>
+          <li
+            className={menu === "mentor" ? "active" : ""}
+            onClick={() => setMenu("mentor")}
+          >
+            💰Tambah Mentor
           </li>
         </ul>
 
@@ -132,6 +139,7 @@ const DashboardAdmin: React.FC = () => {
         {/* ================= HARGA & ASET ================= */}
         {menu === "harga" && <HargaAsset />}
         {menu === "user" && <User />}
+        {menu === "mentor" && <Mentor />}
 
       </div>
     </div>

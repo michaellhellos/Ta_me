@@ -3,6 +3,7 @@ import Login from "./components/Login";
 import Register from "./components/Register";
 import Dashboard from "./pages/Dashboard";
 import DashboardAdmin from "./pages/admin/DashboardAdmin";
+import MentorDashboard from "./pages/mentor/MentorDashboard";
 
 // Protect route berdasarkan login
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
@@ -51,7 +52,14 @@ function App() {
             </AdminRoute>
           }
         />
-
+      <Route
+          path="/mentor/dashboard"
+          element={
+            <PrivateRoute>
+              <MentorDashboard />
+            </PrivateRoute>
+          }
+        />
       </Routes>
     </Router>
   );

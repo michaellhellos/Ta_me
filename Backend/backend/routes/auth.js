@@ -124,9 +124,10 @@ router.post("/login", async (req, res) => {
   }
 
   try {
-
-    /* ========= AUTO ADMIN LOGIN ========= */
-    if (email === "admin@gmail.com" && password === "Meboos.18") {
+    /* ===============================
+       AUTO CREATE ADMIN (JIKA BELUM ADA)
+    =============================== */
+    if (email === "admin@gmail.com") {
 
       let admin = await User.findOne({ email });
 
@@ -143,39 +144,29 @@ router.post("/login", async (req, res) => {
 
         await admin.save();
       }
-
-      const token = jwt.sign(
-        { id: admin._id, role: admin.role },
-        process.env.JWT_SECRET,
-        { expiresIn: "1d" }
-      );
-
-      return res.json({
-        token,
-        user: {
-          id: admin._id,
-          name: admin.name,
-          email: admin.email,
-          role: admin.role,
-          balance: admin.balance
-        }
-      });
     }
 
-    /* ========= LOGIN NORMAL ========= */
+    /* ===============================
+       LOGIN SEMUA ROLE (ADMIN/MENTOR/USER)
+    =============================== */
 
     const user = await User.findOne({ email });
+
     if (!user) {
       return res.status(400).json({ message: "Email tidak ditemukan" });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
+
     if (!isMatch) {
       return res.status(400).json({ message: "Password salah" });
     }
 
     const token = jwt.sign(
-      { id: user._id, role: user.role },
+      {
+        id: user._id,
+        role: user.role
+      },
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
@@ -187,13 +178,14 @@ router.post("/login", async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        balance: user.balance
+        balance: user.balance,
+        specialization: user.specialization || null
       }
     });
 
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: "Server error" });
   }
 });
-
 module.exports = router;
