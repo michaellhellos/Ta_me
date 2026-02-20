@@ -114,3 +114,33 @@ tr {
   font-size: 14px;
   opacity: 0.8;
 }
+/* Wrapper tabel bisa scroll */
+.table-box {
+  max-height: 500px;   /* tinggi maksimal tabel */
+  overflow-y: auto;    /* aktifkan scroll vertical */
+  overflow-x: auto;    /* kalau tabel lebar */
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+}
+
+/* Header tetap di atas saat scroll */
+.table-box thead th {
+  position: sticky;
+  top: 0;
+  background: #10143F;
+  z-index: 2;
+}
+
+/* Scrollbar lebih halus */
+.table-box::-webkit-scrollbar {
+  width: 8px;
+}
+
+.table-box::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 10px;
+}
+
+.table-box::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
