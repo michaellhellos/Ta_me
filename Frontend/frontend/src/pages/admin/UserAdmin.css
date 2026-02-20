@@ -132,3 +132,33 @@ tbody tr {
 .edit-btn:hover {
   color: #00f5d4;
 }
+/* Wrapper tabel bisa discroll */
+.table-wrapper {
+  max-height: 500px;      /* tinggi maksimal */
+  overflow-y: auto;       /* aktifkan scroll vertical */
+  overflow-x: auto;       /* kalau tabel lebar */
+  border-radius: 10px;
+  border: 1px solid #e0e0e0;
+}
+
+/* Supaya header tetap di atas saat scroll */
+.table-wrapper thead th {
+  position: sticky;
+  top: 0;
+  background: #10143F;
+  z-index: 2;
+}
+
+/* Supaya scroll lebih halus */
+.table-wrapper::-webkit-scrollbar {
+  width: 8px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 10px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
