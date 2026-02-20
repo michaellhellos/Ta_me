@@ -113,3 +113,82 @@
   text-align: center;
   color: #9ca3af;
 }
+/* =========================
+   RIWAYAT TRANSAKSI
+========================= */
+
+.riwayat-box {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.riwayat-box p {
+  opacity: 0.6;
+  text-align: center;
+  padding: 20px;
+}
+
+/* ITEM */
+.riwayat-item {
+  background: rgba(30, 41, 59, 0.6);
+  backdrop-filter: blur(10px);
+  padding: 18px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.05);
+  box-shadow: 0 10px 30px rgba(0,0,0,.4);
+  transition: 0.3s ease;
+  line-height: 1.6;
+}
+
+.riwayat-item:hover {
+  transform: translateY(-3px);
+  background: rgba(30, 41, 59, 0.8);
+}
+
+/* TYPE BADGE */
+.riwayat-item strong {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+
+/* BUY STYLE */
+.riwayat-item strong:contains("BUY") {
+  background: rgba(34,197,94,0.15);
+  color: #22c55e;
+}
+
+/* SELL STYLE */
+.riwayat-item strong:contains("SELL") {
+  background: rgba(239,68,68,0.15);
+  color: #ef4444;
+}
+.empty {
+  text-align: center;
+  opacity: 0.6;
+}
+
+.badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.badge.buy {
+  background: rgba(34,197,94,0.2);
+  color: #22c55e;
+}
+
+.badge.sell {
+  background: rgba(239,68,68,0.2);
+  color: #ef4444;
+}
+
+.coin-name {
+  font-weight: 600;
+}
