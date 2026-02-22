@@ -268,6 +268,125 @@ router.get("/history", auth, async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+router.get("/mentor/students", auth, async (req, res) => {
+  try {
+    const students = await User.find({ role: "user" })
+      .select("_id name email");
 
+    const result = [];
+
+    for (let student of students) {
+      const transactions = await Transaction.find({
+        userId: student._id
+      });
+
+      let totalProfit = 0;
+      let buyMap = {};
+
+      transactions.forEach(trx => {
+        if (trx.type === "BUY") {
+          if (!buyMap[trx.coinId]) {
+            buyMap[trx.coinId] = { totalQty: 0, totalCost: 0 };
+          }
+
+          buyMap[trx.coinId].totalQty += trx.quantity;
+          buyMap[trx.coinId].totalCost += trx.total;
+        }
+
+        if (trx.type === "SELL") {
+          if (buyMap[trx.coinId]) {
+            const avgBuy =
+              buyMap[trx.coinId].totalCost /
+              buyMap[trx.coinId].totalQty;
+
+            const profit =
+              (trx.price - avgBuy) * trx.quantity;
+
+            totalProfit += profit;
+          }
+        }
+      });
+
+      result.push({
+        _id: student._id,
+        name: student.name,
+        email: student.email,
+        totalProfit
+      });
+    }
+
+    res.json({ success: true, data: result });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+router.get("/mentor/history/:userId", auth, async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const transactions = await Transaction.find({ userId })
+      .sort({ createdAt: -1 });
+
+    let totalProfit = 0;
+    let totalBuy = 0;
+
+    let buyMap = {};
+
+    const history = transactions.map(trx => {
+      let profit = 0;
+      let percent = 0;
+
+      if (trx.type === "BUY") {
+        if (!buyMap[trx.coinId]) {
+          buyMap[trx.coinId] = { totalQty: 0, totalCost: 0 };
+        }
+
+        buyMap[trx.coinId].totalQty += trx.quantity;
+        buyMap[trx.coinId].totalCost += trx.total;
+
+        totalBuy += trx.total;
+      }
+
+      if (trx.type === "SELL" && buyMap[trx.coinId]) {
+        const avgBuy =
+          buyMap[trx.coinId].totalCost /
+          buyMap[trx.coinId].totalQty;
+
+        profit = (trx.price - avgBuy) * trx.quantity;
+
+        percent = (profit / (avgBuy * trx.quantity)) * 100;
+
+        totalProfit += profit;
+      }
+
+      return {
+        _id: trx._id,
+        name: trx.name,
+        type: trx.type,
+        quantity: trx.quantity,
+        price: trx.price,
+        profit,
+        percent,
+        createdAt: trx.createdAt
+      };
+    });
+
+    const totalPercent =
+      totalBuy > 0 ? (totalProfit / totalBuy) * 100 : 0;
+
+    res.json({
+      success: true,
+      transactions: history,
+      totalProfit,
+      totalPercent
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 module.exports = router;
 
