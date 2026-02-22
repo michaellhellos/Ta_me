@@ -1,0 +1,61 @@
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.title {
+  color: #00ffc8;
+}
+
+.search-input {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid #2a3b4c;
+  background: #0f172a;
+  color: white;
+  outline: none;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal {
+  background: #1e293b;
+  padding: 25px;
+  border-radius: 12px;
+  width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.history-item {
+  background: #0f172a;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.total-profit {
+  margin-top: 15px;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.close-btn {
+  margin-top: 15px;
+  padding: 8px 14px;
+  border: none;
+  background: #00ffc8;
+  border-radius: 8px;
+  cursor: pointer;
+}

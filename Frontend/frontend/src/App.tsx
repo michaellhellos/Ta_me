@@ -4,14 +4,13 @@ import Register from "./components/Register";
 import Dashboard from "./pages/Dashboard";
 import DashboardAdmin from "./pages/admin/DashboardAdmin";
 import MentorDashboard from "./pages/mentor/MentorDashboard";
+import Chat from "./pages/Chat";
 
-// Protect route berdasarkan login
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
   const token = localStorage.getItem("token");
   return token ? children : <Navigate to="/" />;
 };
 
-// Protect route khusus admin
 const AdminRoute = ({ children }: { children: JSX.Element }) => {
   const user = localStorage.getItem("user");
 
@@ -52,7 +51,9 @@ function App() {
             </AdminRoute>
           }
         />
-      <Route
+
+        {/* MENTOR DASHBOARD */}
+        <Route
           path="/mentor/dashboard"
           element={
             <PrivateRoute>
@@ -60,6 +61,17 @@ function App() {
             </PrivateRoute>
           }
         />
+
+        {/* CHAT ROUTE (PINDAHKAN KE SINI) */}
+        <Route
+          path="/chat/:conversationId"
+          element={
+            <PrivateRoute>
+              <Chat />
+            </PrivateRoute>
+          }
+        />
+
       </Routes>
     </Router>
   );
