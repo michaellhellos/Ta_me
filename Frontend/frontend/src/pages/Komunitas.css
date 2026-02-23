@@ -146,8 +146,17 @@
   color: var(--danger);
 }
 
-/* Forum placeholder */
-.forum-placeholder {
+/* ======= FORUM FEED ======= */
+.forum-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: fadeSlideUp 0.5s var(--ease-out);
+}
+
+.forum-loading,
+.forum-error,
+.forum-empty {
   background: var(--card-bg);
   backdrop-filter: var(--card-blur);
   -webkit-backdrop-filter: var(--card-blur);
@@ -155,18 +164,230 @@
   border-radius: var(--card-radius);
   padding: 48px 24px;
   text-align: center;
-  animation: fadeSlideUp 0.5s var(--ease-out);
 }
 
-.forum-placeholder h3 {
+.forum-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-muted);
+}
+
+.forum-error p {
+  color: var(--danger);
+  font-size: 14px;
+}
+
+.forum-empty h3 {
   font-size: 18px;
   font-weight: 700;
   margin-bottom: 8px;
 }
 
-.forum-placeholder p {
+.forum-empty p {
   color: var(--text-muted);
   font-size: 14px;
+}
+
+/* ── Post Card ── */
+.forum-post-card {
+  background: var(--card-bg);
+  backdrop-filter: var(--card-blur);
+  -webkit-backdrop-filter: var(--card-blur);
+  border: 1px solid var(--card-border);
+  border-radius: var(--card-radius);
+  padding: 24px;
+  transition: border-color var(--transition-normal);
+  position: relative;
+}
+
+.forum-post-card:hover {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.forum-post-card.pinned {
+  border-left: 3px solid var(--warning);
+}
+
+.pin-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--warning);
+  background: rgba(245, 158, 11, 0.1);
+  border-radius: 6px;
+  padding: 3px 10px;
+  margin-bottom: 12px;
+}
+
+/* ── Post Header ── */
+.post-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.post-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--gradient-brand);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.post-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.post-meta strong {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.post-role {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--accent);
+  background: rgba(34, 197, 94, 0.1);
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.post-time {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* ── Post Content (rich HTML) ── */
+.post-content {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text-primary);
+  word-break: break-word;
+}
+
+.post-content p {
+  margin-bottom: 8px;
+}
+
+.post-content img {
+  max-width: 100%;
+  border-radius: 12px;
+  margin: 10px 0;
+  border: 1px solid var(--card-border);
+}
+
+.post-content blockquote {
+  border-left: 3px solid var(--primary);
+  padding-left: 14px;
+  color: var(--text-secondary);
+  margin: 10px 0;
+}
+
+.post-content pre {
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 10px;
+  padding: 14px;
+  overflow-x: auto;
+  font-size: 13px;
+  color: var(--accent);
+}
+
+.post-content code {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.post-content a {
+  color: var(--primary);
+  text-decoration: underline;
+}
+
+/* ── Post Attachments (files) ── */
+.post-attachments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.post-file-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface-1);
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-size: 13px;
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: var(--transition-fast);
+}
+
+.post-file-link:hover {
+  background: var(--surface-2);
+  color: var(--primary);
+}
+
+.post-file-link .file-size {
+  color: var(--text-muted);
+  font-size: 11px;
+  margin-left: 4px;
+}
+
+/* ── Post Actions ── */
+.post-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--card-border);
+}
+
+.like-btn {
+  background: transparent;
+  border: 1px solid var(--card-border);
+  color: var(--text-secondary);
+  padding: 6px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 13px;
+  font-family: inherit;
+  transition: var(--transition-fast);
+  box-shadow: none;
+}
+
+.like-btn:hover {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.3);
+  box-shadow: none;
+  transform: none;
+}
+
+.like-btn.liked {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: var(--danger);
+}
+
+.comment-count {
+  font-size: 13px;
+  color: var(--text-muted);
 }
 
 /* Responsive */
