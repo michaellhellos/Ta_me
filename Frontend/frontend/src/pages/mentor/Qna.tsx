@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { io } from "socket.io-client";
 import "./MentorDashboard.css";
+
+const socket = io("http://localhost:5000");
 
 interface Participant {
   _id: string;
@@ -24,7 +27,6 @@ const Qna: React.FC = () => {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
 
-  // Safe parsing user
   const user = React.useMemo(() => {
     try {
       return JSON.parse(localStorage.getItem("user") || "{}");
@@ -33,11 +35,9 @@ const Qna: React.FC = () => {
     }
   }, []);
 
-  useEffect(() => {
-    if (!token) return;
-    fetchConversations();
-  }, [token]);
-
+  /* =========================
+     FETCH CONVERSATIONS
+  ========================= */
   const fetchConversations = async () => {
     try {
       setLoading(true);
@@ -62,6 +62,33 @@ const Qna: React.FC = () => {
       setLoading(false);
     }
   };
+
+  /* =========================
+     REALTIME SOCKET EFFECT
+  ========================= */
+  useEffect(() => {
+    if (!token) return;
+
+    fetchConversations();
+
+    socket.on("receive_message", (data) => {
+      setConversations((prev) =>
+        prev.map((conv) =>
+          conv._id === data.conversationId
+            ? {
+                ...conv,
+                lastMessage: data.text,
+                lastMessageAt: new Date().toISOString()
+              }
+            : conv
+        )
+      );
+    });
+
+    return () => {
+      socket.off("receive_message");
+    };
+  }, [token]);
 
   const handleOpenChat = (conversationId: string) => {
     navigate(`/chat/${conversationId}`);
@@ -91,21 +118,18 @@ const Qna: React.FC = () => {
           </span>
         </div>
 
-        {/* LOADING */}
         {loading && (
           <div className="text-center text-gray-400">
             Loading percakapan...
           </div>
         )}
 
-        {/* ERROR */}
         {error && (
           <div className="text-center text-red-400">
             {error}
           </div>
         )}
 
-        {/* EMPTY STATE */}
         {!loading && conversations.length === 0 && (
           <div className="text-center text-gray-500">
             Belum ada percakapan masuk.
