@@ -5,13 +5,11 @@ const Komunitas = () => {
   const [tab, setTab] = useState<"leaderboard" | "forum">("leaderboard");
 
   return (
-    <div className="komunitas">
+    <div className="komunitas-page">
       {/* HERO */}
       <section className="komunitas-hero">
-        <div>
-          <h2>Komunitas Trader 🌍</h2>
-          <p>Bersaing di Leaderboard & Diskusi Strategi!</p>
-        </div>
+        <h2>Komunitas Trader 🌍</h2>
+        <p>Bersaing di Leaderboard & Diskusi Strategi!</p>
       </section>
 
       {/* TAB */}
@@ -63,7 +61,7 @@ const Komunitas = () => {
 
           <div className="leaderboard-row highlight">
             <span>#4</span>
-            <strong>memegunawan@gmail.com</strong>
+            <strong>Kamu</strong>
             <span className="green">+12%</span>
             <span>$11,200</span>
           </div>

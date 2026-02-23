@@ -1,90 +1,93 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { User, Mail, Lock } from "lucide-react";
 import "./Register.css";
 
-interface RegisterProps {
-  goToLogin: () => void;
-}
+const Register = () => {
+  const navigate = useNavigate();
 
-const Register: React.FC<RegisterProps> = ({ goToLogin }) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const [success, setSuccess] = useState(false);
 
-  // 👉 fungsi register
   const handleRegister = async () => {
     try {
       const response = await fetch("http://localhost:5000/api/auth/register", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          name,
-          email,
-          password
-        })
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
         setMessage(data.message);
+        setSuccess(false);
         return;
       }
 
-      setMessage("Register berhasil 🎉");
-      setTimeout(() => goToLogin(), 1500);
-
-    } catch (error) {
+      setMessage("Register berhasil! Redirecting...");
+      setSuccess(true);
+      setTimeout(() => navigate("/"), 1500);
+    } catch {
       setMessage("Gagal koneksi ke server");
+      setSuccess(false);
     }
   };
 
   return (
-    <div className="container">
-      <div className="card">
-        <h1>Kripto-Z</h1>
-        <p className="subtitle">Buat akun & mulai belajar cuan!</p>
+    <div className="register-container">
+      <div className="register-card">
+        <div className="register-brand">
+          <h1>Kripto-Z</h1>
+          <p>Buat akun & mulai belajar cuan!</p>
+        </div>
 
-        <label>Username</label>
-        <input
-          type="text"
-          placeholder="Contoh: Satoshi"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
+        <div className="form-group">
+          <label><User /> Username</label>
+          <input
+            type="text"
+            placeholder="Contoh: Satoshi"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+        </div>
 
-        <label>Email</label>
-        <input
-          type="email"
-          placeholder="email@kamu.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+        <div className="form-group">
+          <label><Mail /> Email</label>
+          <input
+            type="email"
+            placeholder="email@kamu.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </div>
 
-        <label>Password</label>
-        <input
-          type="password"
-          placeholder="••••••••"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        <div className="form-group">
+          <label><Lock /> Password</label>
+          <input
+            type="password"
+            placeholder="••••••••"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
 
-        {message && <p style={{ color: "red" }}>{message}</p>}
+        {message && (
+          <div className={success ? "register-success" : "register-error"}>
+            {message}
+          </div>
+        )}
 
         <button className="register-btn" onClick={handleRegister}>
           Daftar Sekarang 🚀
         </button>
 
-        <p className="login-link">
+        <p className="register-footer">
           Sudah punya akun?{" "}
-          <span
-            onClick={goToLogin}
-            style={{ cursor: "pointer", color: "#4f46e5" }}
-          >
-            Login di sini
-          </span>
+          <span onClick={() => navigate("/")}>Login di sini</span>
         </p>
       </div>
     </div>

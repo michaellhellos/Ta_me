@@ -1,100 +1,184 @@
-.komunitas {
-  padding: 16px;
-  color: #fff;
+/* ==========================================================
+   KOMUNITAS / COMMUNITY PAGE
+   ========================================================== */
+
+.komunitas-page {
+  padding: 8px 0;
+  animation: fadeSlideUp 0.5s var(--ease-out);
 }
 
-/* HERO */
+/* Hero */
 .komunitas-hero {
-  background: linear-gradient(135deg, #9333ea, #4f46e5);
-  border-radius: 16px;
-  padding: 20px;
-  margin-bottom: 16px;
+  background: var(--gradient-purple);
+  border-radius: var(--card-radius);
+  padding: 28px 24px;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.komunitas-hero::after {
+  content: '';
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 50%;
+  top: -60px;
+  right: -40px;
 }
 
 .komunitas-hero h2 {
-  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+  position: relative;
+  z-index: 1;
 }
 
 .komunitas-hero p {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.8);
   margin-top: 6px;
-  color: #e5e7eb;
+  position: relative;
+  z-index: 1;
 }
 
-/* TAB */
+/* Tab */
 .komunitas-tab {
   display: flex;
-  background: #1f2937;
-  border-radius: 12px;
-  overflow: hidden;
-  margin-bottom: 14px;
+  background: var(--surface-1);
+  border-radius: 14px;
+  padding: 4px;
+  margin-bottom: 20px;
+  gap: 4px;
 }
 
 .komunitas-tab button {
   flex: 1;
-  padding: 12px;
-  background: none;
+  padding: 11px 16px;
+  background: transparent;
   border: none;
-  color: #9ca3af;
-  cursor: pointer;
+  border-radius: 10px;
+  color: var(--text-muted);
   font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  box-shadow: none;
+}
+
+.komunitas-tab button:hover {
+  color: var(--text-secondary);
+  box-shadow: none;
+  transform: none;
 }
 
 .komunitas-tab button.active {
-  background: #111827;
-  color: #c084fc;
-  font-weight: bold;
+  background: var(--bg-base);
+  color: var(--purple);
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transform: none;
 }
 
-/* LEADERBOARD */
+/* Leaderboard */
 .leaderboard-card {
-  background: #1f2937;
-  border-radius: 14px;
+  background: var(--card-bg);
+  backdrop-filter: var(--card-blur);
+  -webkit-backdrop-filter: var(--card-blur);
+  border: 1px solid var(--card-border);
+  border-radius: var(--card-radius);
   overflow: hidden;
+  animation: fadeSlideUp 0.5s var(--ease-out);
 }
 
 .leaderboard-header,
 .leaderboard-row {
   display: grid;
-  grid-template-columns: 60px 1fr 120px 120px;
-  padding: 12px 16px;
+  grid-template-columns: 60px 1fr 110px 110px;
+  padding: 14px 20px;
   align-items: center;
 }
 
 .leaderboard-header {
-  font-size: 12px;
-  color: #9ca3af;
-  background: #111827;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid var(--card-border);
 }
 
 .leaderboard-row {
-  border-top: 1px solid #374151;
+  border-bottom: 1px solid var(--card-border);
+  transition: var(--transition-fast);
+}
+
+.leaderboard-row:last-child {
+  border-bottom: none;
+}
+
+.leaderboard-row:hover {
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .leaderboard-row strong {
   font-weight: 600;
+  font-size: 14px;
+}
+
+.leaderboard-row span {
+  font-size: 13px;
 }
 
 .leaderboard-row.highlight {
-  background: rgba(139, 92, 246, 0.15);
+  background: rgba(139, 92, 246, 0.08);
+  border-left: 3px solid var(--purple);
 }
 
-/* COLORS */
 .green {
-  color: #22c55e;
+  color: var(--accent);
 }
 
 .red {
-  color: #ef4444;
+  color: var(--danger);
 }
 
-/* FORUM */
+/* Forum placeholder */
 .forum-placeholder {
-  background: #1f2937;
-  border-radius: 14px;
-  padding: 24px;
+  background: var(--card-bg);
+  backdrop-filter: var(--card-blur);
+  -webkit-backdrop-filter: var(--card-blur);
+  border: 1px solid var(--card-border);
+  border-radius: var(--card-radius);
+  padding: 48px 24px;
   text-align: center;
+  animation: fadeSlideUp 0.5s var(--ease-out);
+}
+
+.forum-placeholder h3 {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 8px;
 }
 
 .forum-placeholder p {
-  color: #9ca3af;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+
+  .leaderboard-header,
+  .leaderboard-row {
+    grid-template-columns: 50px 1fr 90px;
+  }
+
+  .leaderboard-header span:last-child,
+  .leaderboard-row span:last-child {
+    display: none;
+  }
 }
