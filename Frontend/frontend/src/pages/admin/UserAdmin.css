@@ -1,164 +1,106 @@
-.admin-container {
-  display: flex;
-  height: 100vh;
-  background: linear-gradient(135deg, #0f172a, #0b1120);
-  color: white;
-  font-family: "Segoe UI", sans-serif;
-}
+/* ==========================================================
+   USER ADMIN — TABLE STYLES
+   ========================================================== */
 
-/* SIDEBAR */
-.sidebar {
-  width: 250px;
-  background: #111827;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.logo {
-  color: #00f5d4;
-  font-size: 20px;
-  margin-bottom: 30px;
-}
-
-.logo span {
-  color: white;
-  font-size: 14px;
-}
-
-.sidebar ul {
-  list-style: none;
-  padding: 0;
-}
-
-.sidebar li {
-  padding: 12px;
-  cursor: pointer;
-  border-radius: 8px;
-  margin-bottom: 8px;
-  transition: 0.3s;
-}
-
-.sidebar li:hover {
-  background: #1f2937;
-}
-
-.sidebar li.active {
-  background: #0d9488;
-}
-
-.logout-btn {
-  padding: 10px;
-  border: none;
-  border-radius: 8px;
-  background: #7f1d1d;
-  color: white;
-  cursor: pointer;
-}
-
-/* MAIN */
-.main {
-  flex: 1;
-  padding: 40px;
-}
-
-.main h1 {
-  margin-bottom: 30px;
-}
-
-/* TABLE */
 .table-container {
-  background: #1f2937;
-  padding: 20px;
-  border-radius: 15px;
+  background: var(--card-bg);
+  backdrop-filter: var(--card-blur);
+  -webkit-backdrop-filter: var(--card-blur);
+  border: 1px solid var(--card-border);
+  padding: 4px;
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
 }
 
-table {
+.table-wrapper {
+  max-height: 600px;
+  overflow-y: auto;
+  overflow-x: auto;
+  border-radius: 16px;
+}
+
+.table-wrapper thead th {
+  position: sticky;
+  top: 0;
+  background: var(--card-bg-solid);
+  z-index: 2;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.table-wrapper table {
   width: 100%;
   border-collapse: collapse;
 }
 
-thead {
+.table-wrapper th,
+.table-wrapper td {
+  padding: 16px 18px;
   text-align: left;
-  font-size: 14px;
-  color: #94a3b8;
 }
 
-th, td {
-  padding: 16px;
+.table-wrapper tbody tr {
+  border-top: 1px solid var(--card-border);
+  transition: var(--transition-fast);
 }
 
-tbody tr {
-  border-top: 1px solid #374151;
+.table-wrapper tbody tr:hover {
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .user-info span {
   display: block;
   font-size: 12px;
-  color: #9ca3af;
+  color: var(--text-muted);
 }
 
 .equity {
-  color: #00f5d4;
-  font-weight: bold;
+  color: var(--primary);
+  font-weight: 700;
 }
 
-/* BADGE */
 .badge {
-  padding: 6px 12px;
-  border-radius: 8px;
+  padding: 5px 12px;
+  border-radius: 20px;
   font-size: 12px;
-  font-weight: bold;
+  font-weight: 600;
 }
 
 .badge.active {
-  background: #065f46;
-  color: #34d399;
+  background: var(--accent-glow);
+  color: var(--accent);
 }
 
 .badge.suspended {
-  background: #7f1d1d;
-  color: #f87171;
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--danger);
 }
 
 .edit-btn {
   background: transparent;
   border: none;
-  color: #cbd5e1;
+  color: var(--text-muted);
   cursor: pointer;
+  padding: 6px;
+  transition: var(--transition-fast);
+  box-shadow: none;
 }
 
 .edit-btn:hover {
-  color: #00f5d4;
-}
-/* Wrapper tabel bisa discroll */
-.table-wrapper {
-  max-height: 500px;      /* tinggi maksimal */
-  overflow-y: auto;       /* aktifkan scroll vertical */
-  overflow-x: auto;       /* kalau tabel lebar */
-  border-radius: 10px;
-  border: 1px solid #e0e0e0;
+  color: var(--primary);
+  box-shadow: none;
+  transform: none;
 }
 
-/* Supaya header tetap di atas saat scroll */
-.table-wrapper thead th {
-  position: sticky;
-  top: 0;
-  background: #10143F;
-  z-index: 2;
-}
-
-/* Supaya scroll lebih halus */
+/* Scrollbar */
 .table-wrapper::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 .table-wrapper::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 10px;
-}
-
-.table-wrapper::-webkit-scrollbar-thumb:hover {
-  background: #999;
+  background: var(--surface-2);
+  border-radius: 50px;
 }

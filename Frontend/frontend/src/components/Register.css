@@ -1,75 +1,192 @@
-.container {
+/* ==========================================================
+   REGISTER PAGE
+   ========================================================== */
+
+.register-container {
   min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: radial-gradient(circle at top left, #0ea5e9, #020617);
+  background: var(--bg-gradient);
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
 }
 
-.card {
-  width: 380px;
-  padding: 32px;
-  border-radius: 16px;
-  background: rgba(15, 23, 42, 0.88);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.65);
-  color: white;
+.register-container::before {
+  content: '';
+  position: absolute;
+  width: 450px;
+  height: 450px;
+  background: var(--teal);
+  border-radius: 50%;
+  filter: blur(130px);
+  opacity: 0.12;
+  top: -120px;
+  right: -80px;
+  pointer-events: none;
 }
 
-.card h1 {
-  text-align: center;
-  color: #38bdf8;
-  margin-bottom: 6px;
+.register-container::after {
+  content: '';
+  position: absolute;
+  width: 350px;
+  height: 350px;
+  background: var(--purple);
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.1;
+  bottom: -80px;
+  left: -60px;
+  pointer-events: none;
 }
 
-.subtitle {
-  text-align: center;
-  font-size: 14px;
-  opacity: 0.85;
-  margin-bottom: 26px;
-}
-
-label {
-  font-size: 13px;
-  opacity: 0.85;
-}
-
-input {
+.register-card {
   width: 100%;
-  padding: 12px;
-  margin: 6px 0 18px;
-  border-radius: 10px;
-  border: none;
-  background: #020617;
-  color: white;
+  max-width: 420px;
+  background: var(--card-bg);
+  backdrop-filter: var(--card-blur);
+  -webkit-backdrop-filter: var(--card-blur);
+  border: 1px solid var(--card-border);
+  border-radius: var(--card-radius);
+  padding: 44px 36px;
+  box-shadow: var(--card-shadow);
+  color: var(--text-primary);
+  animation: fadeSlideUp 0.6s var(--ease-out);
+  position: relative;
+  z-index: 1;
 }
 
-input:focus {
-  outline: 1px solid #38bdf8;
+.register-brand {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.register-brand h1 {
+  font-size: 30px;
+  font-weight: 800;
+  background: var(--gradient-brand);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.register-brand p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 6px;
+}
+
+/* Reuse .form-group from Login.css — they share same global.css */
+.register-card .form-group {
+  margin-bottom: 20px;
+}
+
+.register-card .form-group label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.register-card .form-group label svg {
+  width: 14px;
+  height: 14px;
+  opacity: 0.6;
+}
+
+.register-card .form-group input {
+  width: 100%;
+  padding: 13px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--card-border);
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: inherit;
+  transition: var(--transition-fast);
+  outline: none;
+}
+
+.register-card .form-group input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-glow);
+}
+
+.register-card .form-group input::placeholder {
+  color: var(--text-muted);
+}
+
+.register-error {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: var(--danger);
+  margin-bottom: 18px;
+  animation: fadeSlideUp 0.3s var(--ease-out);
+}
+
+.register-success {
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: var(--accent);
+  margin-bottom: 18px;
+  animation: fadeSlideUp 0.3s var(--ease-out);
 }
 
 .register-btn {
   width: 100%;
-  padding: 13px;
-  margin-top: 10px;
-  background: linear-gradient(to right, #14b8a6, #2563eb);
+  padding: 14px;
   border: none;
-  border-radius: 10px;
+  border-radius: 14px;
+  background: var(--gradient-brand);
   color: white;
-  font-weight: bold;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: inherit;
   cursor: pointer;
+  transition: var(--transition-normal);
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
 }
 
 .register-btn:hover {
-  opacity: 0.9;
+  transform: translateY(-2px);
+  box-shadow: 0 14px 36px rgba(99, 102, 241, 0.45);
 }
 
-.login-link {
-  margin-top: 18px;
-  font-size: 13px;
+.register-btn:active {
+  transform: translateY(0);
+}
+
+.register-footer {
   text-align: center;
+  margin-top: 24px;
+  font-size: 13px;
+  color: var(--text-secondary);
 }
 
-.login-link span {
-  color: #38bdf8;
+.register-footer span {
+  color: var(--primary);
   cursor: pointer;
+  font-weight: 500;
+  transition: var(--transition-fast);
+}
+
+.register-footer span:hover {
+  color: var(--indigo);
+  text-decoration: underline;
+}
+
+@media (max-width: 480px) {
+  .register-card {
+    padding: 32px 24px;
+  }
 }

@@ -1,61 +1,71 @@
-.header-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 25px;
+/* ==========================================================
+   PANTAU SISWA — MENTOR
+   ========================================================== */
+
+.pantau-container {
+  padding: 28px 40px;
+  animation: fadeSlideUp 0.5s var(--ease-out);
 }
 
-.title {
-  color: #00ffc8;
+.pantau-container h2 {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 24px;
 }
 
-.search-input {
-  padding: 8px 14px;
-  border-radius: 8px;
-  border: 1px solid #2a3b4c;
-  background: #0f172a;
-  color: white;
-  outline: none;
+.pantau-table {
+  background: var(--card-bg);
+  backdrop-filter: var(--card-blur);
+  -webkit-backdrop-filter: var(--card-blur);
+  border: 1px solid var(--card-border);
+  border-radius: var(--card-radius);
+  overflow: hidden;
+  box-shadow: var(--card-shadow);
 }
 
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.7);
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.pantau-table table {
+  width: 100%;
+  border-collapse: collapse;
 }
 
-.modal {
-  background: #1e293b;
-  padding: 25px;
-  border-radius: 12px;
-  width: 500px;
-  max-height: 80vh;
-  overflow-y: auto;
+.pantau-table thead th {
+  background: rgba(0, 0, 0, 0.2);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 14px 18px;
+  text-align: left;
 }
 
-.history-item {
-  background: #0f172a;
-  padding: 12px;
-  border-radius: 8px;
-  margin-bottom: 10px;
-  display: flex;
-  justify-content: space-between;
+.pantau-table tbody td {
+  padding: 14px 18px;
+  font-size: 14px;
 }
 
-.total-profit {
-  margin-top: 15px;
-  font-weight: bold;
-  font-size: 16px;
+.pantau-table tbody tr {
+  border-bottom: 1px solid var(--card-border);
+  transition: var(--transition-fast);
 }
 
-.close-btn {
-  margin-top: 15px;
-  padding: 8px 14px;
-  border: none;
-  background: #00ffc8;
-  border-radius: 8px;
-  cursor: pointer;
+.pantau-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.pantau-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.pantau-empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .pantau-container {
+    padding: 16px 20px;
+  }
 }

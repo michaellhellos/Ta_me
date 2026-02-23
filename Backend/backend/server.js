@@ -52,6 +52,8 @@ app.use("/api/trade", require("./routes/trade"));
 app.use("/api/mentor", require("./routes/mentor"));
 app.use("/api/materi", require("./routes/Materi"));
 app.use("/api/chat", require("./routes/chatRoutes"));
+app.use("/api/nilai", require("./routes/nilaiRoutes"));
+app.use("/api/community", require("./routes/community"));
 
 /* =========================
    SOCKET.IO SETUP

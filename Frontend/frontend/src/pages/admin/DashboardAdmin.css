@@ -1,86 +1,193 @@
+/* ==========================================================
+   ADMIN DASHBOARD — UNIFIED STYLES
+   ========================================================== */
+
 .admin-container {
   display: flex;
   min-height: 100vh;
-  background: #0f172a;
-  color: white;
-  font-family: "Poppins", sans-serif;
+  background: var(--bg-gradient);
+  color: var(--text-primary);
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
 }
 
-/* SIDEBAR */
+/* ================= SIDEBAR ================= */
 .sidebar {
   width: 260px;
-  background: #1e293b;
-  padding: 30px 20px;
+  background: var(--card-bg);
+  backdrop-filter: var(--card-blur);
+  -webkit-backdrop-filter: var(--card-blur);
+  border-right: 1px solid var(--card-border);
+  padding: 28px 20px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  animation: fadeSlideUp 0.4s var(--ease-out);
 }
 
 .logo {
-  font-size: 20px;
+  font-size: 22px;
+  font-weight: 800;
   margin-bottom: 40px;
+  background: var(--gradient-brand);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .logo span {
-  color: #10b981;
+  background: var(--gradient-green);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-size: 14px;
+  font-weight: 600;
+  margin-left: 6px;
 }
 
 .sidebar ul {
   list-style: none;
   padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .sidebar li {
-  padding: 12px;
-  border-radius: 8px;
+  padding: 12px 14px;
+  border-radius: 12px;
   cursor: pointer;
-  margin-bottom: 10px;
-  transition: 0.3s;
+  transition: var(--transition-fast);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
 }
 
 .sidebar li:hover {
-  background: #334155;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary);
 }
 
 .sidebar .active {
-  background: #10b981;
-  color: black;
+  background: var(--gradient-brand);
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
 }
 
 .logout-btn {
-  background: #7f1d1d;
-  color: white;
-  border: none;
-  padding: 10px;
-  border-radius: 8px;
+  background: rgba(127, 29, 29, 0.6);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: var(--danger);
+  padding: 12px;
+  border-radius: 12px;
   cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  transition: var(--transition-fast);
+  box-shadow: none;
 }
 
-/* MAIN */
+.logout-btn:hover {
+  background: rgba(127, 29, 29, 0.9);
+  color: white;
+  box-shadow: none;
+  transform: none;
+}
+
+/* ================= MAIN CONTENT ================= */
 .main {
   flex: 1;
   padding: 40px;
+  animation: fadeSlideUp 0.5s var(--ease-out);
 }
 
+.main h1 {
+  font-size: 26px;
+  font-weight: 800;
+  margin-bottom: 28px;
+  background: var(--gradient-brand);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ================= STAT CARDS ================= */
 .cards {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 20px;
-  margin: 30px 0;
+  margin-bottom: 28px;
 }
 
 .card {
-  background: #1e293b;
-  padding: 20px;
-  border-radius: 15px;
-  flex: 1;
+  background: var(--card-bg);
+  backdrop-filter: var(--card-blur);
+  -webkit-backdrop-filter: var(--card-blur);
+  border: 1px solid var(--card-border);
+  padding: 22px;
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+}
+
+.card p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.card h2 {
+  font-size: 24px;
+  font-weight: 700;
 }
 
 .green {
-  color: #10b981;
+  color: var(--accent);
 }
 
+/* ================= CHART ================= */
 .chart-box {
-  background: #1e293b;
-  padding: 20px;
-  border-radius: 15px;
+  background: var(--card-bg);
+  backdrop-filter: var(--card-blur);
+  -webkit-backdrop-filter: var(--card-blur);
+  border: 1px solid var(--card-border);
+  padding: 24px;
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+}
+
+.chart-box h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 900px) {
+  .admin-container {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--card-border);
+    padding: 16px;
+  }
+
+  .sidebar ul {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .main {
+    padding: 20px;
+  }
 }

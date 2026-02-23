@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { io } from "socket.io-client";
+import { ArrowLeft, Send } from "lucide-react";
+import "./Chat.css";
 
 const socket = io("http://localhost:5000");
 
@@ -17,6 +19,7 @@ type Message = {
 
 const Chat = () => {
   const { conversationId } = useParams();
+  const navigate = useNavigate();
   const [messages, setMessages] = useState<Message[]>([]);
   const [text, setText] = useState("");
 
@@ -28,15 +31,12 @@ const Chat = () => {
 
     fetchMessages();
 
-    // Join room
     socket.emit("join_conversation", conversationId);
 
-    // Receive message realtime
     socket.on("receive_message", (data: Message) => {
       setMessages((prev) => [...prev, data]);
     });
 
-    // Update read status
     socket.on("message_read_update", (data) => {
       setMessages((prev) =>
         prev.map((msg) =>
@@ -57,9 +57,7 @@ const Chat = () => {
     try {
       const res = await axios.get(
         `http://localhost:5000/api/chat/message/${conversationId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       if (res.data.success) {
@@ -76,26 +74,19 @@ const Chat = () => {
     try {
       const res = await axios.post(
         "http://localhost:5000/api/chat/message",
-        {
-          conversationId,
-          text
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
+        { conversationId, text },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       const newMessage = res.data.data;
 
-      // Emit realtime
       socket.emit("send_message", {
         ...newMessage,
-        conversationId
+        conversationId,
       });
 
       setMessages((prev) => [...prev, newMessage]);
       setText("");
-
     } catch (error) {
       console.error(error);
     }
@@ -104,40 +95,45 @@ const Chat = () => {
   const markAsRead = (messageId: string) => {
     socket.emit("message_read", {
       conversationId,
-      messageId
+      messageId,
     });
   };
 
-  return (
-    <div className="h-screen flex flex-col bg-[#0f172a] text-white p-4">
-      
-      <h2 className="text-xl font-bold mb-4">Chat Room</h2>
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  };
 
-      <div className="flex-1 overflow-y-auto space-y-3 mb-4">
+  return (
+    <div className="chat-page">
+      <div className="chat-header">
+        <button className="back-btn" onClick={() => navigate(-1)}>
+          <ArrowLeft size={22} />
+        </button>
+        <h2>Chat Room</h2>
+      </div>
+
+      <div className="chat-messages">
         {messages.map((msg) => {
           const isMe = msg.sender._id === user._id;
 
           return (
             <div
               key={msg._id}
-              className={`flex ${isMe ? "justify-end" : "justify-start"}`}
+              className={`msg-wrapper ${isMe ? "me" : "other"}`}
               onClick={() => !isMe && msg._id && markAsRead(msg._id)}
             >
-              <div
-                className={`px-4 py-2 rounded-2xl max-w-xs ${
-                  isMe
-                    ? "bg-green-500 text-black"
-                    : "bg-gray-700"
-                }`}
-              >
+              <div className="msg-bubble">
                 <p>{msg.text}</p>
 
                 {isMe && (
-                  <div className="text-xs text-right mt-1">
+                  <div className="msg-status">
                     {msg.status === "read" ? (
-                      <span className="text-blue-400">✔✔</span>
+                      <span className="read">✔✔</span>
                     ) : (
-                      <span className="text-gray-300">✔</span>
+                      <span>✔</span>
                     )}
                   </div>
                 )}
@@ -147,18 +143,16 @@ const Chat = () => {
         })}
       </div>
 
-      <div className="flex gap-2">
+      <div className="chat-input-area">
         <input
-          className="flex-1 p-3 rounded-full bg-gray-800 outline-none"
+          className="chat-input"
           value={text}
           onChange={(e) => setText(e.target.value)}
+          onKeyDown={handleKeyDown}
           placeholder="Ketik pesan..."
         />
-        <button
-          className="bg-green-500 px-6 rounded-full font-semibold hover:bg-green-600"
-          onClick={sendMessage}
-        >
-          Kirim
+        <button className="chat-send-btn" onClick={sendMessage}>
+          <Send />
         </button>
       </div>
     </div>
