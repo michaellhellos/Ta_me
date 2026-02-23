@@ -27,6 +27,7 @@
 
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 const http = require("http");
 const { Server } = require("socket.io");
 const connectDB = require("./config/db");
@@ -39,7 +40,8 @@ connectDB();
    MIDDLEWARE
 ========================= */
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: "10mb" }));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 /* =========================
    ROUTES (TIDAK DIUBAH)

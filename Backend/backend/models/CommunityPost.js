@@ -1,5 +1,20 @@
 const mongoose = require("mongoose");
 
+const attachmentSchema = new mongoose.Schema(
+  {
+    url: { type: String, required: true },
+    originalName: { type: String, required: true },
+    mimeType: { type: String, required: true },
+    size: { type: Number, required: true },
+    type: {
+      type: String,
+      enum: ["image", "file"],
+      required: true
+    }
+  },
+  { _id: false }
+);
+
 const communityPostSchema = new mongoose.Schema(
   {
     author: {
@@ -25,18 +40,25 @@ const communityPostSchema = new mongoose.Schema(
       trim: true
     },
 
+    // NEW: structured attachments array
+    attachments: {
+      type: [attachmentSchema],
+      default: []
+    },
+
+    // DEPRECATED — kept for backward compat
     image: {
-      type: String, // URL gambar (jika ada)
+      type: String,
       default: null
     },
 
     file: {
-      type: String, // URL file (pdf dll)
+      type: String,
       default: null
     },
 
     link: {
-      type: String, // optional external link
+      type: String,
       default: null
     },
 
