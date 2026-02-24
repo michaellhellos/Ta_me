@@ -12,6 +12,16 @@ interface Attachment {
   type: "image" | "file";
 }
 
+interface CommentData {
+  _id: string;
+  postId: string;
+  author: string;
+  authorName: string;
+  role: string;
+  text: string;
+  createdAt: string;
+}
+
 interface Post {
   _id: string;
   author: { _id: string; name: string; email: string } | null;
@@ -31,6 +41,13 @@ const Komunitas = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Comment state
+  const [expandedComments, setExpandedComments] = useState<Record<string, boolean>>({});
+  const [commentsData, setCommentsData] = useState<Record<string, CommentData[]>>({});
+  const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
+  const [loadingComments, setLoadingComments] = useState<Record<string, boolean>>({});
+  const [submittingComment, setSubmittingComment] = useState<Record<string, boolean>>({});
 
   const getToken = () => localStorage.getItem("token") || "";
   const getUserId = () => {
@@ -90,6 +107,68 @@ const Komunitas = () => {
     }
   };
 
+  /* ── Toggle Comments ── */
+  const toggleComments = async (postId: string) => {
+    const isOpening = !expandedComments[postId];
+
+    setExpandedComments(prev => ({ ...prev, [postId]: isOpening }));
+
+    // Fetch comments if opening and not yet loaded
+    if (isOpening && !commentsData[postId]) {
+      try {
+        setLoadingComments(prev => ({ ...prev, [postId]: true }));
+        const res = await axios.get(`${API}/${postId}/comments`, {
+          headers: { Authorization: `Bearer ${getToken()}` }
+        });
+        setCommentsData(prev => ({
+          ...prev,
+          [postId]: Array.isArray(res.data.data) ? res.data.data : []
+        }));
+      } catch (err) {
+        console.error("FETCH COMMENTS ERROR:", err);
+      } finally {
+        setLoadingComments(prev => ({ ...prev, [postId]: false }));
+      }
+    }
+  };
+
+  /* ── Submit Comment ── */
+  const submitComment = async (postId: string) => {
+    const text = (commentInputs[postId] || "").trim();
+    if (!text) return;
+
+    try {
+      setSubmittingComment(prev => ({ ...prev, [postId]: true }));
+      const res = await axios.post(
+        `${API}/${postId}/comment`,
+        { text },
+        { headers: { Authorization: `Bearer ${getToken()}` } }
+      );
+
+      // Append new comment
+      setCommentsData(prev => ({
+        ...prev,
+        [postId]: [...(prev[postId] || []), res.data.comment]
+      }));
+
+      // Increment commentsCount in posts
+      setPosts(prev =>
+        prev.map(p =>
+          p._id === postId
+            ? { ...p, commentsCount: p.commentsCount + 1 }
+            : p
+        )
+      );
+
+      // Clear input
+      setCommentInputs(prev => ({ ...prev, [postId]: "" }));
+    } catch (err: any) {
+      alert(err.response?.data?.message || "Gagal mengirim komentar");
+    } finally {
+      setSubmittingComment(prev => ({ ...prev, [postId]: false }));
+    }
+  };
+
   /* ── Format helpers ── */
   const timeAgo = (dateStr: string) => {
     const now = Date.now();
@@ -114,6 +193,12 @@ const Komunitas = () => {
   const isLiked = (post: Post) => {
     const uid = getUserId();
     return post.likes.some(id => id === uid);
+  };
+
+  const getRoleEmoji = (role: string) => {
+    if (role === "admin") return "🛡️";
+    if (role === "mentor") return "👨‍🏫";
+    return "👤";
   };
 
   return (
@@ -149,35 +234,30 @@ const Komunitas = () => {
             <span>PROFIT (%)</span>
             <span>TOTAL ASET</span>
           </div>
-
           <div className="leaderboard-row">
             <span>🥇</span>
             <strong>CryptoMaster</strong>
             <span className="green">+1,240%</span>
             <span>$124,500</span>
           </div>
-
           <div className="leaderboard-row">
             <span>🥈</span>
             <strong>SatoshiFan</strong>
             <span className="green">+890%</span>
             <span>$98,200</span>
           </div>
-
           <div className="leaderboard-row">
             <span>🥉</span>
             <strong>MoonWalker</strong>
             <span className="green">+450%</span>
             <span>$54,100</span>
           </div>
-
           <div className="leaderboard-row highlight">
             <span>#4</span>
             <strong>Kamu</strong>
             <span className="green">+12%</span>
             <span>$11,200</span>
           </div>
-
           <div className="leaderboard-row">
             <span>#5</span>
             <strong>HODL_Gang</strong>
@@ -235,7 +315,7 @@ const Komunitas = () => {
                 dangerouslySetInnerHTML={{ __html: post.content }}
               />
 
-              {/* Attachments — file downloads only (images are inline in content) */}
+              {/* Attachments — file downloads only */}
               {post.attachments && post.attachments.filter(a => a.type === "file").length > 0 && (
                 <div className="post-attachments">
                   {post.attachments
@@ -264,10 +344,70 @@ const Komunitas = () => {
                 >
                   {isLiked(post) ? "❤️" : "🤍"} {post.totalLikes}
                 </button>
-                <span className="comment-count">
+                <button
+                  className={`comment-btn ${expandedComments[post._id] ? "active" : ""}`}
+                  onClick={() => toggleComments(post._id)}
+                >
                   💬 {post.commentsCount}
-                </span>
+                </button>
               </div>
+
+              {/* Comment Section */}
+              {expandedComments[post._id] && (
+                <div className="comment-section">
+                  {/* Loading */}
+                  {loadingComments[post._id] && (
+                    <div className="comment-loading">Memuat komentar...</div>
+                  )}
+
+                  {/* Comment List */}
+                  {commentsData[post._id] && commentsData[post._id].length > 0 && (
+                    <div className="comment-list">
+                      {commentsData[post._id].map(c => (
+                        <div key={c._id} className="comment-item">
+                          <div className="comment-header">
+                            <span className="comment-avatar">{getRoleEmoji(c.role)}</span>
+                            <strong className="comment-name">{c.authorName}</strong>
+                            <span className="comment-role">{c.role}</span>
+                            <span className="comment-time">{timeAgo(c.createdAt)}</span>
+                          </div>
+                          <p className="comment-text">{c.text}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Empty state */}
+                  {commentsData[post._id] && commentsData[post._id].length === 0 && !loadingComments[post._id] && (
+                    <div className="comment-empty">Belum ada komentar. Jadilah yang pertama!</div>
+                  )}
+
+                  {/* Comment Input */}
+                  <div className="comment-input-row">
+                    <input
+                      type="text"
+                      placeholder="Tulis komentar..."
+                      value={commentInputs[post._id] || ""}
+                      onChange={e => setCommentInputs(prev => ({ ...prev, [post._id]: e.target.value }))}
+                      onKeyDown={e => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                          e.preventDefault();
+                          submitComment(post._id);
+                        }
+                      }}
+                      maxLength={1000}
+                      disabled={submittingComment[post._id]}
+                    />
+                    <button
+                      className="comment-submit-btn"
+                      onClick={() => submitComment(post._id)}
+                      disabled={submittingComment[post._id] || !(commentInputs[post._id] || "").trim()}
+                    >
+                      {submittingComment[post._id] ? "..." : "Kirim"}
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>

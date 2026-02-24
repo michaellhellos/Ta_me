@@ -7,6 +7,7 @@ const mentorOnly = require("../middleware/mentorOnly");
 const { uploadImage, uploadFile } = require("../middleware/upload");
 const { sanitizeContent } = require("../middleware/sanitize");
 const CommunityPost = require("../models/CommunityPost");
+const Comment = require("../models/Comment");
 
 /* ===============================
    UPLOAD IMAGE
@@ -193,6 +194,75 @@ router.post("/:id/like", auth, async (req, res) => {
 
   } catch (error) {
     console.error("LIKE POST ERROR:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+/* ===============================
+   CREATE COMMENT (ALL ROLES)
+================================= */
+router.post("/:id/comment", auth, async (req, res) => {
+  try {
+    const { text } = req.body;
+    const postId = req.params.id;
+
+    // Validate text
+    if (!text || text.trim() === "") {
+      return res.status(400).json({ message: "Komentar tidak boleh kosong" });
+    }
+
+    if (text.length > 1000) {
+      return res.status(400).json({ message: "Komentar maksimal 1000 karakter" });
+    }
+
+    // Check post exists
+    const post = await CommunityPost.findById(postId);
+    if (!post || !post.isActive) {
+      return res.status(404).json({ message: "Post tidak ditemukan" });
+    }
+
+    // Create comment
+    const comment = new Comment({
+      postId,
+      author: req.user._id,
+      authorName: req.user.name,
+      role: req.user.role,
+      text: text.trim()
+    });
+
+    await comment.save();
+
+    // Increment commentsCount
+    await CommunityPost.findByIdAndUpdate(postId, {
+      $inc: { commentsCount: 1 }
+    });
+
+    res.status(201).json({
+      success: true,
+      comment
+    });
+
+  } catch (error) {
+    console.error("CREATE COMMENT ERROR:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+/* ===============================
+   GET COMMENTS FOR A POST
+================================= */
+router.get("/:id/comments", auth, async (req, res) => {
+  try {
+    const comments = await Comment.find({ postId: req.params.id })
+      .sort({ createdAt: 1 });
+
+    res.json({
+      success: true,
+      data: comments
+    });
+
+  } catch (error) {
+    console.error("GET COMMENTS ERROR:", error);
     res.status(500).json({ message: "Server error" });
   }
 });
