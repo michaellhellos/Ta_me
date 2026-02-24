@@ -1,15 +1,17 @@
 import React, { useState } from "react";
 import "./MentorDashboard.css";
 import { MessageCircle, Users, Radio, Clock } from "lucide-react";
-import Qna from "./Qna"; // pastikan file ini ada
+import Qna from "./Qna";
 import PantauSiswa from "./PantauSiswa";
 import Createforum from "./Createforum";
-// nanti bisa tambahkan PantauSiswa, Broadcast dll
+import MentorForumFeed from "./MentorForumFeed";
 
 type Menu = "live" | "qna" | "siswa" | "broadcast";
 
 const MentorDashboard: React.FC = () => {
   const [menu, setMenu] = useState<Menu>("live");
+  const [forumRefreshKey, setForumRefreshKey] = useState(0);
+  const handlePostCreated = () => setForumRefreshKey(k => k + 1);
 
   return (
     <div className="mentor-dashboard">
@@ -120,15 +122,11 @@ const MentorDashboard: React.FC = () => {
 
       {menu === "qna" && <Qna />}
       {menu === "siswa" && <PantauSiswa />}
-     {menu === "broadcast" && <Createforum />}
-
-     
-
       {menu === "broadcast" && (
-        <div className="content-section">
-          <h2>Forum Broadcast</h2>
-          <div className="empty-box">Belum ada broadcast.</div>
-        </div>
+        <>
+          <Createforum onPostCreated={handlePostCreated} />
+          <MentorForumFeed refreshKey={forumRefreshKey} />
+        </>
       )}
     </div>
   );
