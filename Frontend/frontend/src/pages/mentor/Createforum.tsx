@@ -47,7 +47,11 @@ interface Attachment {
   type: "image" | "file";
 }
 
-const Createforum: React.FC = () => {
+interface CreateforumProps {
+  onPostCreated?: () => void;
+}
+
+const Createforum: React.FC<CreateforumProps> = ({ onPostCreated }) => {
   const [content, setContent] = useState("");
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [showEmoji, setShowEmoji] = useState(false);
@@ -201,6 +205,7 @@ const Createforum: React.FC = () => {
       alert("Broadcast berhasil dikirim 🚀");
       setContent("");
       setAttachments([]);
+      onPostCreated?.();
     } catch (err: any) {
       alert(err.response?.data?.message || "Terjadi kesalahan server");
     } finally {

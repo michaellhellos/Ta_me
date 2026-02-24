@@ -78,22 +78,22 @@ const Simulasi: React.FC<SimulasiProps> = ({ coin }) => {
     const token = localStorage.getItem("token");
     if (!token) return;
 
-    try {
-      const res = await fetch(`${API}/history`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      try {
+        const res = await fetch(`${API}/history`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-      const data = await res.json();
+        const data = await res.json();
 
-      setHistory(
-        data.transactions ||
-        data.data ||
-        data.user?.transactions ||
-        []
-      );
-    } catch {
-      alert("Gagal mengambil riwayat transaksi");
-    }
+        setHistory(
+          data.transactions ||
+          data.data ||
+          data.user?.transactions ||
+          []
+        );
+      } catch {
+        alert("Gagal mengambil riwayat transaksi");
+      }
   }, []);
 
   useEffect(() => {

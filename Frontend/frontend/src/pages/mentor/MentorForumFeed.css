@@ -1,0 +1,80 @@
+/* ==========================================================
+   MENTOR FORUM FEED — STYLES
+   ========================================================== */
+
+.mentor-forum-feed {
+    padding: 0 40px 40px;
+    animation: fadeSlideUp 0.5s var(--ease-out);
+}
+
+/* ── Header ── */
+.mentor-feed-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--card-border);
+}
+
+.mentor-feed-header h3 {
+    font-size: 18px;
+    font-weight: 700;
+    background: var(--gradient-brand);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.mentor-feed-count {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    background: var(--surface-1);
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--card-border);
+}
+
+/* ── Feed List ── */
+.mentor-feed-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* ── Empty State ── */
+.feed-empty {
+    background: var(--card-bg);
+    backdrop-filter: var(--card-blur);
+    -webkit-backdrop-filter: var(--card-blur);
+    border: 1px solid var(--card-border);
+    border-radius: var(--card-radius);
+    padding: 48px 24px;
+    text-align: center;
+}
+
+.feed-empty-icon {
+    font-size: 40px;
+    margin-bottom: 12px;
+    opacity: 0.7;
+}
+
+.feed-empty h4 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+}
+
+.feed-empty p {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+    .mentor-forum-feed {
+        padding: 0 20px 20px;
+    }
+}
