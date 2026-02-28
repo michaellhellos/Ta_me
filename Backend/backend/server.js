@@ -56,6 +56,7 @@ app.use("/api/materi", require("./routes/Materi"));
 app.use("/api/chat", require("./routes/chatRoutes"));
 app.use("/api/nilai", require("./routes/nilaiRoutes"));
 app.use("/api/community", require("./routes/community"));
+app.use("/api/schedule", require("./routes/schedule"));
 
 /* =========================
    SOCKET.IO SETUP

@@ -76,10 +76,10 @@ const Qna: React.FC = () => {
         prev.map((conv) =>
           conv._id === data.conversationId
             ? {
-                ...conv,
-                lastMessage: data.text,
-                lastMessageAt: new Date().toISOString()
-              }
+              ...conv,
+              lastMessage: data.text,
+              lastMessageAt: new Date().toISOString()
+            }
             : conv
         )
       );
@@ -95,88 +95,61 @@ const Qna: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0f172a] to-[#020617] text-white">
-      
-      {/* HEADER */}
-      <div className="flex justify-between items-center px-8 py-4 border-b border-gray-700">
-        <div>
-          <h1 className="text-xl font-bold">{user?.name || "Mentor"}</h1>
-          <p className="text-sm text-green-400">MENTOR DASHBOARD</p>
-        </div>
+    <div className="qna-container">
+
+      {/* TITLE */}
+      <div className="qna-title">
+        <h2>Inbox Chat Siswa</h2>
+        <span className="qna-badge">Total {conversations.length}</span>
       </div>
 
-      {/* CONTENT */}
-      <div className="max-w-3xl mx-auto mt-8 px-4">
+      {loading && (
+        <div className="qna-loading">Loading percakapan...</div>
+      )}
 
-        {/* TITLE */}
-        <div className="flex items-center gap-3 mb-6">
-          <h2 className="text-2xl font-semibold">
-            Inbox Chat Siswa
-          </h2>
-          <span className="bg-gray-700 text-sm px-3 py-1 rounded-full">
-            Total {conversations.length}
-          </span>
-        </div>
+      {error && (
+        <div className="qna-error">{error}</div>
+      )}
 
-        {loading && (
-          <div className="text-center text-gray-400">
-            Loading percakapan...
-          </div>
-        )}
+      {!loading && conversations.length === 0 && (
+        <div className="qna-empty">Belum ada percakapan masuk.</div>
+      )}
 
-        {error && (
-          <div className="text-center text-red-400">
-            {error}
-          </div>
-        )}
+      {/* LIST CONVERSATION */}
+      {!loading &&
+        conversations.map((conv) => {
+          const student = conv.participants.find(
+            (p) => p._id !== user?._id
+          );
 
-        {!loading && conversations.length === 0 && (
-          <div className="text-center text-gray-500">
-            Belum ada percakapan masuk.
-          </div>
-        )}
-
-        {/* LIST CONVERSATION */}
-        <div className="space-y-6">
-          {!loading &&
-            conversations.map((conv) => {
-              const student = conv.participants.find(
-                (p) => p._id !== user?._id
-              );
-
-              return (
-                <div
-                  key={conv._id}
-                  className="bg-[#1e293b] rounded-xl p-6 shadow-lg border border-gray-700 hover:border-green-500 transition"
-                >
-                  <div className="flex justify-between items-center mb-3">
-                    <div>
-                      <h3 className="font-semibold text-lg">
-                        {student?.name || "User"}
-                      </h3>
-                      <p className="text-sm text-gray-400">
-                        {conv.lastMessageAt
-                          ? new Date(conv.lastMessageAt).toLocaleString()
-                          : "Belum ada pesan"}
-                      </p>
-                    </div>
-
-                    <button
-                      onClick={() => handleOpenChat(conv._id)}
-                      className="bg-green-500 hover:bg-green-600 px-4 py-2 rounded-full text-sm font-medium transition duration-200"
-                    >
-                      BALAS 💬
-                    </button>
-                  </div>
-
-                  <div className="bg-[#0f172a] p-4 rounded-lg text-gray-300 text-sm">
-                    {conv.lastMessage || "Mulai percakapan..."}
-                  </div>
+          return (
+            <div key={conv._id} className="qna-card">
+              <div className="qna-card-top">
+                <div>
+                  <span className="qna-name">
+                    {student?.name || "User"}
+                  </span>
+                  <span className="qna-time">
+                    {conv.lastMessageAt
+                      ? new Date(conv.lastMessageAt).toLocaleString()
+                      : "Belum ada pesan"}
+                  </span>
                 </div>
-              );
-            })}
-        </div>
-      </div>
+
+                <button
+                  className="qna-btn"
+                  onClick={() => handleOpenChat(conv._id)}
+                >
+                  BALAS 💬
+                </button>
+              </div>
+
+              <div className="qna-preview">
+                {conv.lastMessage || "Mulai percakapan..."}
+              </div>
+            </div>
+          );
+        })}
     </div>
   );
 };

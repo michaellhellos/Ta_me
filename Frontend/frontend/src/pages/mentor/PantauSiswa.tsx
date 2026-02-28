@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import "./PantauSiswa.css";
 
 interface Student {
   _id: string;
@@ -33,7 +34,6 @@ const PantauSiswa: React.FC = () => {
     fetchStudents();
   }, []);
 
-  // ================= FETCH STUDENTS =================
   const fetchStudents = async () => {
     try {
       setLoading(true);
@@ -56,7 +56,6 @@ const PantauSiswa: React.FC = () => {
     }
   };
 
-  // ================= FETCH HISTORY =================
   const fetchHistory = async (userId: string) => {
     try {
       setLoading(true);
@@ -87,128 +86,117 @@ const PantauSiswa: React.FC = () => {
   };
 
   return (
-    <div className="content-section">
-      <h2 style={{ marginBottom: 20 }}>Daftar Siswa</h2>
+    <div className="pantau-container">
+      <h2 className="pantau-title">Daftar Siswa</h2>
 
-      {loading && <p>Loading...</p>}
+      {loading && <p className="pantau-loading">Loading...</p>}
 
-      {/* ================= TABLE ================= */}
-      <table className="student-table" style={{ width: "100%" }}>
-        <thead>
-          <tr>
-            <th>Nama</th>
-            <th>Email</th>
-            <th>Total Profit (%)</th>
-          </tr>
-        </thead>
-        <tbody>
-          {students.length === 0 && (
+      {/* TABLE */}
+      <div className="pantau-table-wrapper">
+        <table className="pantau-table">
+          <thead>
             <tr>
-              <td colSpan={3}>Belum ada data siswa</td>
+              <th>Nama</th>
+              <th>Email</th>
+              <th>Total Profit</th>
             </tr>
-          )}
+          </thead>
+          <tbody>
+            {students.length === 0 && (
+              <tr>
+                <td colSpan={3} className="pantau-empty">Belum ada data siswa</td>
+              </tr>
+            )}
 
-          {students.map(student => (
-            <tr
-              key={student._id}
-              onClick={() => handleClick(student)}
-              style={{ cursor: "pointer" }}
-            >
-              <td>{student.name}</td>
-              <td>{student.email}</td>
-              <td
-                style={{
-                  color:
-                    student.totalProfit >= 0
-                      ? "#00ff99"
-                      : "#ff4d4d",
-                  fontWeight: "bold"
-                }}
+            {students.map(student => (
+              <tr
+                key={student._id}
+                onClick={() => handleClick(student)}
+                className="pantau-row"
               >
-                {student.totalProfit >= 0 ? "+" : ""}
-                {student.totalProfit.toFixed(2)}%
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+                <td><strong>{student.name}</strong></td>
+                <td>{student.email}</td>
+                <td
+                  className={
+                    student.totalProfit >= 0
+                      ? "profit-green"
+                      : "profit-red"
+                  }
+                >
+                  {student.totalProfit >= 0 ? "+" : ""}
+                  {student.totalProfit.toFixed(2)}%
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
-      {/* ================= MODAL ================= */}
+      {/* MODAL */}
       {selected && (
         <div className="modal-overlay">
           <div className="modal">
-            <h3 style={{ marginBottom: 15 }}>
-              History - {selected.name}
+            <h3 className="modal-title">
+              History — {selected.name}
             </h3>
 
             {history.length === 0 && (
-              <p>Belum ada transaksi</p>
+              <p className="pantau-empty">Belum ada transaksi</p>
             )}
 
-            {history.map(trx => (
-              <div
-                key={trx._id}
-                style={{
-                  padding: 10,
-                  marginBottom: 10,
-                  background: "#111",
-                  borderRadius: 8
-                }}
-              >
-                <div>
-                  <strong>{trx.name}</strong> ({trx.type})
-                </div>
-
-                {trx.type === "SELL" && (
-                  <div>
-                    Profit:{" "}
-                    <span
-                      style={{
-                        color:
-                          trx.profit >= 0
-                            ? "#00ff99"
-                            : "#ff4d4d",
-                        fontWeight: "bold"
-                      }}
-                    >
-                      {trx.profit >= 0 ? "+" : ""}
-                      {trx.profit.toFixed(2)} (
-                      {trx.percent.toFixed(2)}%)
+            <div className="history-list">
+              {history.map(trx => (
+                <div key={trx._id} className="history-item">
+                  <div className="history-top">
+                    <strong>{trx.name}</strong>
+                    <span className={`history-type ${trx.type.toLowerCase()}`}>
+                      {trx.type}
                     </span>
                   </div>
-                )}
 
-                <div style={{ fontSize: 12, color: "#888" }}>
-                  {new Date(trx.createdAt).toLocaleString()}
+                  {trx.type === "SELL" && (
+                    <div className="history-profit">
+                      Profit:{" "}
+                      <span
+                        className={
+                          trx.profit >= 0
+                            ? "profit-green"
+                            : "profit-red"
+                        }
+                      >
+                        {trx.profit >= 0 ? "+" : ""}
+                        {trx.profit.toFixed(2)} (
+                        {trx.percent.toFixed(2)}%)
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="history-date">
+                    {new Date(trx.createdAt).toLocaleString()}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
 
-            <hr />
+            <hr className="modal-divider" />
 
-            <h4 style={{ marginTop: 15 }}>
-              Total:
+            <div className="history-total">
+              Total:{" "}
               <span
-                style={{
-                  color:
-                    totalProfit >= 0
-                      ? "#00ff99"
-                      : "#ff4d4d",
-                  marginLeft: 10
-                }}
+                className={
+                  totalProfit >= 0
+                    ? "profit-green"
+                    : "profit-red"
+                }
               >
                 {totalProfit >= 0 ? "+" : ""}
                 {totalProfit.toFixed(2)} (
                 {totalPercent.toFixed(2)}%)
               </span>
-            </h4>
+            </div>
 
             <button
-              style={{
-                marginTop: 15,
-                padding: "8px 15px",
-                cursor: "pointer"
-              }}
+              className="close-btn"
               onClick={() => {
                 setSelected(null);
                 setHistory([]);

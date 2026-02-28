@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { MessageCircle, UserX, Calendar } from "lucide-react";
+import { MessageCircle, UserX, Calendar, Clock, ExternalLink } from "lucide-react";
 import "./Ai.css";
 
 type User = {
@@ -11,6 +11,19 @@ type User = {
   role: string;
   createdAt: string;
 };
+
+interface Schedule {
+  _id: string;
+  mentorId: {
+    _id: string;
+    name: string;
+    specialization?: string;
+  };
+  title: string;
+  description: string;
+  date: string;
+  zoomLink: string;
+}
 
 // Deterministic avatar color from name
 const avatarGradients = [
@@ -38,8 +51,26 @@ const formatDate = (dateStr: string) => {
   });
 };
 
+const formatScheduleDate = (dateStr: string) => {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString("id-ID", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+  });
+};
+
+const formatScheduleTime = (dateStr: string) => {
+  const date = new Date(dateStr);
+  return date.toLocaleTimeString("id-ID", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
 const Ai = () => {
   const [mentors, setMentors] = useState<User[]>([]);
+  const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -58,7 +89,22 @@ const Ai = () => {
         setLoading(false);
       }
     };
+
+    const fetchSchedules = async () => {
+      try {
+        const res = await axios.get(
+          "http://localhost:5000/api/schedule/upcoming"
+        );
+        if (res.data.success) {
+          setSchedules(res.data.data || []);
+        }
+      } catch (error) {
+        console.error("FETCH SCHEDULES ERROR:", error);
+      }
+    };
+
     fetchMentors();
+    fetchSchedules();
   }, []);
 
   const handleSelectMentor = async (mentorId: string) => {
@@ -85,6 +131,72 @@ const Ai = () => {
         <p>Konsultasi langsung dengan mentor berpengalaman</p>
       </div>
 
+      {/* ================= UPCOMING SCHEDULES ================= */}
+      {schedules.length > 0 && (
+        <section className="schedule-section">
+          <div className="schedule-section-header">
+            <Calendar size={18} />
+            <h3>Jadwal Mentoring Mendatang</h3>
+            <span className="schedule-count">{schedules.length}</span>
+          </div>
+
+          <div className="schedule-grid">
+            {schedules.map((sch) => (
+              <div className="schedule-card" key={sch._id}>
+                <div className="schedule-card-top">
+                  <div
+                    className="schedule-mentor-avatar"
+                    style={{
+                      background: getAvatarGradient(
+                        sch.mentorId?.name || "M"
+                      ),
+                    }}
+                  >
+                    {(sch.mentorId?.name || "M").charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <strong className="schedule-card-title">
+                      {sch.title}
+                    </strong>
+                    <p className="schedule-card-mentor">
+                      {sch.mentorId?.name || "Mentor"}
+                      {sch.mentorId?.specialization &&
+                        ` • ${sch.mentorId.specialization}`}
+                    </p>
+                  </div>
+                </div>
+
+                {sch.description && (
+                  <p className="schedule-card-desc">{sch.description}</p>
+                )}
+
+                <div className="schedule-card-meta">
+                  <div className="sch-date-info">
+                    <Calendar size={13} />
+                    <span>{formatScheduleDate(sch.date)}</span>
+                  </div>
+                  <div className="sch-date-info">
+                    <Clock size={13} />
+                    <span>{formatScheduleTime(sch.date)}</span>
+                  </div>
+                </div>
+
+                <a
+                  href={sch.zoomLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="join-zoom-btn"
+                >
+                  <ExternalLink size={14} />
+                  Join Zoom Meeting
+                </a>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ================= MENTOR LIST ================= */}
       {loading ? (
         <div className="mentor-skeleton">
           {[1, 2, 3].map((i) => (
@@ -93,7 +205,10 @@ const Ai = () => {
                 <div className="skeleton skeleton-avatar" />
                 <div style={{ flex: 1 }}>
                   <div className="skeleton skeleton-text-lg" />
-                  <div className="skeleton skeleton-text-sm" style={{ marginTop: 8 }} />
+                  <div
+                    className="skeleton skeleton-text-sm"
+                    style={{ marginTop: 8 }}
+                  />
                 </div>
               </div>
               <div className="skeleton skeleton-btn" />
