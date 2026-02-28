@@ -15,6 +15,7 @@ const UserAdmin: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     fetchUsers();
@@ -56,63 +57,78 @@ const UserAdmin: React.FC = () => {
     }
   };
 
+  const filteredUsers = users.filter(
+    (u) =>
+      u.name.toLowerCase().includes(search.toLowerCase()) ||
+      u.email.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
-    <div className="admin-container">
-      <div className="main">
-        <h1>Manajemen Pengguna</h1>
+    <>
+      <h1>Manajemen Pengguna</h1>
 
-        {loading ? (
-          <p>Loading users...</p>
-        ) : (
-          <div className="table-wrapper">
-            <table>
-              <thead>
-                <tr>
-                  <th>TRADER</th>
-                  <th>VIRTUAL EQUITY</th>
-                  <th>ROLE</th>
-                  <th>TGL GABUNG</th>
-                  <th>AKSI</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {users.map((user) => (
-                  <tr key={user._id}>
-                    <td>
-                      <div className="user-info">
-                        <strong>{user.name}</strong>
-                        <span>{user.email}</span>
-                      </div>
-                    </td>
-
-                    <td>${user.balance.toLocaleString()}</td>
-
-                    <td>
-                      <span className={`badge ${user.role}`}>
-                        {user.role.toUpperCase()}
-                      </span>
-                    </td>
-
-                    <td>
-                      {new Date(user.createdAt).toLocaleDateString()}
-                    </td>
-
-                    <td>
-                      <button
-                        className="edit-btn"
-                        onClick={() => handleEditClick(user)}
-                      >
-                        ⚙ Edit
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+      <div className="user-toolbar">
+        <input
+          type="text"
+          placeholder="Cari nama atau email..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="search-input"
+        />
+        <span className="user-count">{filteredUsers.length} pengguna</span>
       </div>
+
+      {loading ? (
+        <p>Loading users...</p>
+      ) : (
+        <div className="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>TRADER</th>
+                <th>VIRTUAL EQUITY</th>
+                <th>ROLE</th>
+                <th>TGL GABUNG</th>
+                <th>AKSI</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {filteredUsers.map((user) => (
+                <tr key={user._id}>
+                  <td>
+                    <div className="user-info">
+                      <strong>{user.name}</strong>
+                      <span>{user.email}</span>
+                    </div>
+                  </td>
+
+                  <td>${user.balance.toLocaleString()}</td>
+
+                  <td>
+                    <span className={`badge ${user.role}`}>
+                      {user.role.toUpperCase()}
+                    </span>
+                  </td>
+
+                  <td>
+                    {new Date(user.createdAt).toLocaleDateString()}
+                  </td>
+
+                  <td>
+                    <button
+                      className="edit-btn"
+                      onClick={() => handleEditClick(user)}
+                    >
+                      ⚙ Edit
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {/* POPUP EDIT */}
       {selectedUser && (
@@ -185,7 +201,7 @@ const UserAdmin: React.FC = () => {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 

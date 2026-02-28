@@ -8,21 +8,21 @@ interface Coin {
   symbol: string;
   current_price: number;
   price_change_percentage_24h: number;
+  image: string;
 }
 
 const HargaAsset: React.FC = () => {
   const [coins, setCoins] = useState<Coin[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
-  // 🔥 FETCH DATA DARI BACKEND
   useEffect(() => {
     fetchCoins();
   }, []);
 
   const fetchCoins = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/trade/coins"); // ganti sesuai port backend kamu
-      
+      const res = await axios.get("http://localhost:5000/api/trade/coins");
+
       if (res.data.success) {
         setCoins(res.data.data);
       }
@@ -32,38 +32,6 @@ const HargaAsset: React.FC = () => {
       setLoading(false);
     }
   };
-
-  // // 🔥 SIMULASI PUMP
-  // const pump = (id: string) => {
-  //   setCoins((prev) =>
-  //     prev.map((coin) =>
-  //       coin.id === id
-  //         ? {
-  //             ...coin,
-  //             current_price: coin.current_price * 1.02,
-  //             price_change_percentage_24h:
-  //               coin.price_change_percentage_24h + 2,
-  //           }
-  //         : coin
-  //     )
-  //   );
-  // };
-
-  // 🔥 SIMULASI DUMP
-  // const dump = (id: string) => {
-  //   setCoins((prev) =>
-  //     prev.map((coin) =>
-  //       coin.id === id
-  //         ? {
-  //             ...coin,
-  //             current_price: coin.current_price * 0.98,
-  //             price_change_percentage_24h:
-  //               coin.price_change_percentage_24h - 2,
-  //           }
-  //         : coin
-  //     )
-  //   );
-  // };
 
   return (
     <div className="harga-container">
@@ -87,7 +55,14 @@ const HargaAsset: React.FC = () => {
               <tbody>
                 {coins.map((coin) => (
                   <tr key={coin.id}>
-                    <td>{coin.name}</td>
+                    <td>
+                      <div className="coin-cell">
+                        {coin.image && (
+                          <img src={coin.image} alt={coin.name} className="coin-thumb" />
+                        )}
+                        <span>{coin.name}</span>
+                      </div>
+                    </td>
                     <td>{coin.symbol.toUpperCase()}</td>
                     <td>
                       $
@@ -103,9 +78,9 @@ const HargaAsset: React.FC = () => {
                           : "red"
                       }
                     >
+                      {coin.price_change_percentage_24h >= 0 ? "+" : ""}
                       {coin.price_change_percentage_24h?.toFixed(2)}%
                     </td>
-                    
                   </tr>
                 ))}
               </tbody>

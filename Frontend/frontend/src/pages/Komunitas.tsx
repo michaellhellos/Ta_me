@@ -3,6 +3,7 @@ import axios from "axios";
 import "./Komunitas.css";
 
 const API = "http://localhost:5000/api/community";
+const TRADE_API = "http://localhost:5000/api/trade";
 
 interface Attachment {
   url: string;
@@ -36,11 +37,24 @@ interface Post {
   createdAt: string;
 }
 
+interface LeaderboardEntry {
+  userId: string;
+  name: string;
+  totalProfit: number;
+  tradeCount: number;
+  rank: number;
+}
+
 const Komunitas = () => {
   const [tab, setTab] = useState<"leaderboard" | "forum">("leaderboard");
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Leaderboard state
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [weekStart, setWeekStart] = useState<string>("");
+  const [lbLoading, setLbLoading] = useState(false);
 
   // Comment state
   const [expandedComments, setExpandedComments] = useState<Record<string, boolean>>({});
@@ -57,6 +71,40 @@ const Komunitas = () => {
     } catch {
       return "";
     }
+  };
+
+  /* ── Fetch Leaderboard ── */
+  useEffect(() => {
+    if (tab !== "leaderboard") return;
+
+    const fetchLeaderboard = async () => {
+      try {
+        setLbLoading(true);
+        const res = await axios.get(`${TRADE_API}/leaderboard`, {
+          headers: { Authorization: `Bearer ${getToken()}` }
+        });
+        if (res.data.success) {
+          setLeaderboard(res.data.data || []);
+          setWeekStart(res.data.weekStart || "");
+        }
+      } catch (err) {
+        console.error("LEADERBOARD ERROR:", err);
+      } finally {
+        setLbLoading(false);
+      }
+    };
+
+    fetchLeaderboard();
+  }, [tab]);
+
+  const formatWeekRange = (isoStr: string) => {
+    if (!isoStr) return "Minggu ini";
+    const start = new Date(isoStr);
+    const end = new Date(start);
+    end.setDate(end.getDate() + 6);
+    const fmt = (d: Date) =>
+      d.toLocaleDateString("id-ID", { day: "numeric", month: "short" });
+    return `${fmt(start)} – ${fmt(end)}`;
   };
 
   /* ── Fetch Posts ── */
@@ -201,6 +249,8 @@ const Komunitas = () => {
     return "👤";
   };
 
+  const currentUserId = getUserId();
+
   return (
     <div className="komunitas-page">
       {/* HERO */}
@@ -228,42 +278,84 @@ const Komunitas = () => {
       {/* LEADERBOARD */}
       {tab === "leaderboard" && (
         <div className="leaderboard-card">
-          <div className="leaderboard-header">
-            <span>RANK</span>
-            <span>TRADER</span>
-            <span>PROFIT (%)</span>
-            <span>TOTAL ASET</span>
+          <div className="lb-title-bar">
+            <h3>🏆 Leaderboard Mingguan</h3>
+            <span className="week-badge">{formatWeekRange(weekStart)}</span>
           </div>
-          <div className="leaderboard-row">
-            <span>🥇</span>
-            <strong>CryptoMaster</strong>
-            <span className="green">+1,240%</span>
-            <span>$124,500</span>
-          </div>
-          <div className="leaderboard-row">
-            <span>🥈</span>
-            <strong>SatoshiFan</strong>
-            <span className="green">+890%</span>
-            <span>$98,200</span>
-          </div>
-          <div className="leaderboard-row">
-            <span>🥉</span>
-            <strong>MoonWalker</strong>
-            <span className="green">+450%</span>
-            <span>$54,100</span>
-          </div>
-          <div className="leaderboard-row highlight">
-            <span>#4</span>
-            <strong>Kamu</strong>
-            <span className="green">+12%</span>
-            <span>$11,200</span>
-          </div>
-          <div className="leaderboard-row">
-            <span>#5</span>
-            <strong>HODL_Gang</strong>
-            <span className="red">-5%</span>
-            <span>$9,500</span>
-          </div>
+
+          {lbLoading && (
+            <div className="lb-loading">
+              <div className="loading-spinner" />
+              <span>Memuat leaderboard...</span>
+            </div>
+          )}
+
+          {/* PODIUM TOP 3 */}
+          {!lbLoading && leaderboard.length >= 3 && (
+            <div className="lb-podium">
+              <div className="lb-podium-item silver">
+                <span className="lb-medal">🥈</span>
+                <strong>{leaderboard[1].name}</strong>
+                <span className={leaderboard[1].totalProfit >= 0 ? "green" : "red"}>
+                  {leaderboard[1].totalProfit >= 0 ? "+" : ""}${leaderboard[1].totalProfit.toFixed(2)}
+                </span>
+                <small>{leaderboard[1].tradeCount} trades</small>
+              </div>
+              <div className="lb-podium-item gold">
+                <span className="lb-medal">🥇</span>
+                <strong>{leaderboard[0].name}</strong>
+                <span className={leaderboard[0].totalProfit >= 0 ? "green" : "red"}>
+                  {leaderboard[0].totalProfit >= 0 ? "+" : ""}${leaderboard[0].totalProfit.toFixed(2)}
+                </span>
+                <small>{leaderboard[0].tradeCount} trades</small>
+              </div>
+              <div className="lb-podium-item bronze">
+                <span className="lb-medal">🥉</span>
+                <strong>{leaderboard[2].name}</strong>
+                <span className={leaderboard[2].totalProfit >= 0 ? "green" : "red"}>
+                  {leaderboard[2].totalProfit >= 0 ? "+" : ""}${leaderboard[2].totalProfit.toFixed(2)}
+                </span>
+                <small>{leaderboard[2].tradeCount} trades</small>
+              </div>
+            </div>
+          )}
+
+          {/* LIST */}
+          {!lbLoading && leaderboard.length > 0 && (
+            <>
+              <div className="lb-list-header">
+                <span>RANK</span>
+                <span>TRADER</span>
+                <span>PROFIT ($)</span>
+              </div>
+              {leaderboard.map((entry) => (
+                <div
+                  key={entry.userId}
+                  className={`leaderboard-row ${entry.userId === currentUserId ? "highlight" : ""}`}
+                >
+                  <span className="lb-rank">
+                    {entry.rank <= 3
+                      ? ["🥇", "🥈", "🥉"][entry.rank - 1]
+                      : `#${entry.rank}`}
+                  </span>
+                  <div className="lb-user">
+                    <strong>{entry.name}</strong>
+                    <small>{entry.tradeCount} trades minggu ini</small>
+                  </div>
+                  <span className={entry.totalProfit >= 0 ? "green" : "red"}>
+                    {entry.totalProfit >= 0 ? "+" : ""}${entry.totalProfit.toFixed(2)}
+                  </span>
+                </div>
+              ))}
+            </>
+          )}
+
+          {!lbLoading && leaderboard.length === 0 && (
+            <div className="lb-empty">
+              <p>Belum ada data trading minggu ini 📊</p>
+              <small>Mulai trading untuk muncul di leaderboard!</small>
+            </div>
+          )}
         </div>
       )}
 

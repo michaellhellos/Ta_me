@@ -163,6 +163,7 @@ router.post("/buy", auth, async (req, res) => {
       type: "BUY",
       coinId: coin.id,
       name: coin.name,
+      symbol: coin.symbol.toUpperCase(),
       price: coin.current_price,
       quantity: qty,
       total
@@ -241,6 +242,7 @@ router.post("/sell", auth, async (req, res) => {
       type: "SELL",
       coinId,
       name: coin.name,
+      symbol: coin.symbol.toUpperCase(),
       price: coin.current_price,
       quantity: qty,
       total
@@ -388,5 +390,89 @@ router.get("/mentor/history/:userId", auth, async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+/* =========================
+   LEADERBOARD (WEEKLY PROFIT)
+========================= */
+router.get("/leaderboard", auth, async (req, res) => {
+  try {
+    // 1. Hitung start of current week (Senin 00:00 WIB)
+    //    WIB = UTC+7, jadi Senin 00:00 WIB = Minggu 17:00 UTC
+    const now = new Date();
+    const dayOfWeek = now.getUTCDay(); // 0=Sun, 1=Mon, ...6=Sat
+    const diffToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+
+    const weekStart = new Date(now);
+    weekStart.setUTCDate(now.getUTCDate() - diffToMonday);
+    weekStart.setUTCHours(0, 0, 0, 0);
+    // Adjust for WIB: Senin 00:00 WIB = Minggu 17:00 UTC
+    weekStart.setUTCHours(weekStart.getUTCHours() - 7);
+
+    // 2. Ambil semua user role "user"
+    const users = await User.find({ role: "user" }).select("_id name");
+
+    // 3. Hitung weekly profit per user
+    const leaderboard = [];
+
+    for (const user of users) {
+      // Semua BUY (tanpa filter waktu) untuk avg cost
+      const allBuys = await Transaction.find({
+        userId: user._id,
+        type: "BUY"
+      });
+
+      const buyMap = {};
+      allBuys.forEach(trx => {
+        if (!buyMap[trx.coinId]) {
+          buyMap[trx.coinId] = { totalQty: 0, totalCost: 0 };
+        }
+        buyMap[trx.coinId].totalQty += trx.quantity;
+        buyMap[trx.coinId].totalCost += trx.total;
+      });
+
+      // SELL hanya dari minggu ini
+      const weeklySells = await Transaction.find({
+        userId: user._id,
+        type: "SELL",
+        createdAt: { $gte: weekStart }
+      });
+
+      let totalProfit = 0;
+      weeklySells.forEach(trx => {
+        if (buyMap[trx.coinId] && buyMap[trx.coinId].totalQty > 0) {
+          const avgBuy =
+            buyMap[trx.coinId].totalCost / buyMap[trx.coinId].totalQty;
+          const profit = (trx.price - avgBuy) * trx.quantity;
+          totalProfit += profit;
+        }
+      });
+
+      leaderboard.push({
+        userId: user._id,
+        name: user.name,
+        totalProfit,
+        tradeCount: weeklySells.length
+      });
+    }
+
+    // 4. Sort DESC by profit
+    leaderboard.sort((a, b) => b.totalProfit - a.totalProfit);
+
+    // 5. Add rank
+    const ranked = leaderboard.map((entry, idx) => ({
+      ...entry,
+      rank: idx + 1
+    }));
+
+    res.json({
+      success: true,
+      weekStart: weekStart.toISOString(),
+      data: ranked
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 module.exports = router;
 

@@ -60,6 +60,9 @@
   font-size: 14px;
   font-weight: 500;
   color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .sidebar li:hover {
@@ -93,6 +96,13 @@
   color: white;
   box-shadow: none;
   transform: none;
+}
+
+.logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
 }
 
 /* ================= MAIN CONTENT ================= */
@@ -129,6 +139,9 @@
   border-radius: var(--card-radius);
   box-shadow: var(--card-shadow);
   transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
 .card:hover {
@@ -139,16 +152,48 @@
 .card p {
   font-size: 13px;
   color: var(--text-secondary);
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .card h2 {
   font-size: 24px;
   font-weight: 700;
+  margin: 0;
 }
 
 .green {
   color: var(--accent);
+}
+
+/* Card Icons */
+.card-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.card-icon.users-icon {
+  background: rgba(99, 102, 241, 0.15);
+  color: #818cf8;
+}
+
+.card-icon.mentors-icon {
+  background: rgba(34, 197, 94, 0.15);
+  color: #22c55e;
+}
+
+.card-icon.coins-icon {
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+}
+
+.card-icon.status-icon {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
 }
 
 /* ================= CHART ================= */

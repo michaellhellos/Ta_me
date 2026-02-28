@@ -9,6 +9,7 @@ const transactionSchema = new mongoose.Schema({
   type: { type: String, enum: ["BUY", "SELL"] },
   coinId: String,
   name: String,
+  symbol: String,
   price: Number,
   quantity: Number,
   total: Number,

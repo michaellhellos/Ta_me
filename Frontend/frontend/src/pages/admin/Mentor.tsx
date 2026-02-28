@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./Mentor.css";
-import { Pencil, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import API from "../services/api";
 
 interface Mentor {
@@ -10,6 +10,22 @@ interface Mentor {
   specialization: string;
   experience: number;
 }
+
+const avatarGradients = [
+  "linear-gradient(135deg, #6366f1, #8b5cf6)",
+  "linear-gradient(135deg, #06b6d4, #38bdf8)",
+  "linear-gradient(135deg, #22c55e, #14b8a6)",
+  "linear-gradient(135deg, #f59e0b, #f97316)",
+  "linear-gradient(135deg, #ec4899, #f43f5e)",
+];
+
+const getGradient = (name: string) => {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return avatarGradients[Math.abs(hash) % avatarGradients.length];
+};
 
 const MentorPage: React.FC = () => {
   const [mentors, setMentors] = useState<Mentor[]>([]);
@@ -24,9 +40,6 @@ const MentorPage: React.FC = () => {
     style: "Santai"
   });
 
-  // =====================
-  // FETCH MENTORS
-  // =====================
   const fetchMentors = async () => {
     try {
       const res = await API.get("/mentor");
@@ -40,9 +53,6 @@ const MentorPage: React.FC = () => {
     fetchMentors();
   }, []);
 
-  // =====================
-  // HANDLE INPUT
-  // =====================
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setForm({
       ...form,
@@ -50,9 +60,6 @@ const MentorPage: React.FC = () => {
     });
   };
 
-  // =====================
-  // CREATE MENTOR
-  // =====================
   const handleSubmit = async () => {
     try {
       await API.post("/mentor", {
@@ -78,9 +85,6 @@ const MentorPage: React.FC = () => {
     }
   };
 
-  // =====================
-  // DELETE MENTOR
-  // =====================
   const handleDelete = async (id: string) => {
     if (!window.confirm("Yakin ingin hapus mentor?")) return;
 
@@ -102,7 +106,6 @@ const MentorPage: React.FC = () => {
           {/* FORM */}
           <div className="card">
             <h3>Daftarkan Mentor Baru</h3>
-            <div className="avatar">👨‍🏫</div>
 
             <p className="section-title">Kredensial Login</p>
             <input name="name" value={form.name} onChange={handleChange} placeholder="Nama Lengkap" />
@@ -137,18 +140,23 @@ const MentorPage: React.FC = () => {
 
             {mentors.map((mentor) => (
               <div key={mentor._id} className="mentor-item">
-                <div className="mentor-info">
-                  <h4>{mentor.name}</h4>
-                  <p className="special">
-                    {mentor.specialization} • {mentor.experience}Y EXP
-                  </p>
-                  <p className="email">{mentor.email}</p>
+                <div className="mentor-left">
+                  <div
+                    className="mentor-avatar"
+                    style={{ background: getGradient(mentor.name) }}
+                  >
+                    {mentor.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="mentor-info">
+                    <h4>{mentor.name}</h4>
+                    <p className="special">
+                      {mentor.specialization} • {mentor.experience}Y EXP
+                    </p>
+                    <p className="email">{mentor.email}</p>
+                  </div>
                 </div>
 
                 <div className="actions">
-                  <button>
-                    <Pencil size={16} />
-                  </button>
                   <button onClick={() => handleDelete(mentor._id)}>
                     <Trash2 size={16} />
                   </button>

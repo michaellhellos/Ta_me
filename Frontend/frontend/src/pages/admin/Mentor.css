@@ -67,10 +67,23 @@
   letter-spacing: 0.5px;
 }
 
-.avatar {
-  font-size: 48px;
-  text-align: center;
-  margin-bottom: 12px;
+.mentor-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+}
+
+.mentor-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .row {
