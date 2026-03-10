@@ -380,57 +380,48 @@ const Dashboard = () => {
             </section>
 
             {/* MARKET */}
-            <section className="card">
-              <div className="section-header">
-                <h3>Pasar Kripto</h3>
-                <span onClick={() => setMenu("simulasi")}>Lihat Semua →</span>
-              </div>
+      <section className="card">
+  <div className="section-header">
+    <h3>Pasar Kripto</h3>
+    <span onClick={() => setMenu("simulasi")}>Lihat Semua →</span>
+  </div>
 
-              {market.map((coin) => (
-                <div
-                  key={coin.id}
-                  className="market-row"
-                  onClick={() => handleSelectCoin(coin)}
-                >
-                  <div className="left">
-                    {coin.image && (
-                      <img src={coin.image} alt={coin.name} className="coin-img-sm" />
-                    )}
-                    <div>
-                      <strong>
-                        {coin.symbol.toUpperCase()}
-                      </strong>
-                      <span>{coin.name}</span>
-                    </div>
-                  </div>
+  <div className="market-list">
+    {market.slice(0,7).map((coin) => (
+      <div
+        key={coin.id}
+        className="market-card"
+        onClick={() => handleSelectCoin(coin)}
+      >
+        <div className="market-left">
+          <img src={coin.image} className="coin-img-sm" />
 
-                  <div className="right">
-                    <strong>
-                      $
-                      {Number(
-                        coin.current_price
-                      ).toLocaleString()}
-                    </strong>
-                    <span
-                      className={
-                        coin.price_change_percentage_24h >= 0
-                          ? "green"
-                          : "red"
-                      }
-                    >
-                      {coin.price_change_percentage_24h >=
-                        0
-                        ? "+"
-                        : ""}
-                      {Number(
-                        coin.price_change_percentage_24h
-                      ).toFixed(2)}
-                      %
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </section>
+          <div>
+            <strong>{coin.symbol.toUpperCase()}</strong>
+            <span>{coin.name}</span>
+          </div>
+        </div>
+
+        <div className="market-right">
+          <strong>
+            ${Number(coin.current_price).toLocaleString()}
+          </strong>
+
+          <span
+            className={
+              coin.price_change_percentage_24h >= 0
+                ? "green"
+                : "red"
+            }
+          >
+            {coin.price_change_percentage_24h >= 0 ? "+" : ""}
+            {coin.price_change_percentage_24h.toFixed(2)}%
+          </span>
+        </div>
+      </div>
+    ))}
+  </div>
+</section>
           </>
         )}
 

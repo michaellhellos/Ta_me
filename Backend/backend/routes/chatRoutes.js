@@ -128,4 +128,34 @@ router.get("/conversation", auth, async (req, res) => {
   }
 });
 
+/* =========================================
+   5️⃣ MARK ALL MESSAGES AS READ (saat buka chat)
+========================================= */
+
+router.put("/mark-read/:conversationId", auth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // Update semua pesan di conversation ini yang:
+    // - receiver adalah user yang sedang login
+    // - isRead masih false
+    const result = await Message.updateMany(
+      {
+        conversationId: req.params.conversationId,
+        receiver: userId,
+        isRead: false
+      },
+      { isRead: true }
+    );
+
+    res.json({
+      success: true,
+      modifiedCount: result.modifiedCount
+    });
+  } catch (error) {
+    console.error("MARK READ ERROR:", error.message);
+    res.status(500).json({ success: false });
+  }
+});
+
 module.exports = router;

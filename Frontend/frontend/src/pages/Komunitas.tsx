@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import Toast from "./Toast";
 import "./Komunitas.css";
 
 const API = "http://localhost:5000/api/community";
@@ -45,11 +46,29 @@ interface LeaderboardEntry {
   rank: number;
 }
 
+/* ── Avatar helpers ── */
+const avatarGradients = [
+  "linear-gradient(135deg, #6366f1, #8b5cf6)",
+  "linear-gradient(135deg, #06b6d4, #38bdf8)",
+  "linear-gradient(135deg, #22c55e, #14b8a6)",
+  "linear-gradient(135deg, #f59e0b, #f97316)",
+  "linear-gradient(135deg, #ec4899, #f43f5e)",
+];
+
+const getAvatarGradient = (name: string) => {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return avatarGradients[Math.abs(hash) % avatarGradients.length];
+};
+
 const Komunitas = () => {
   const [tab, setTab] = useState<"leaderboard" | "forum">("leaderboard");
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
 
   // Leaderboard state
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
@@ -211,7 +230,7 @@ const Komunitas = () => {
       // Clear input
       setCommentInputs(prev => ({ ...prev, [postId]: "" }));
     } catch (err: any) {
-      alert(err.response?.data?.message || "Gagal mengirim komentar");
+      setToast({ message: err.response?.data?.message || "Gagal mengirim komentar", type: "error" });
     } finally {
       setSubmittingComment(prev => ({ ...prev, [postId]: false }));
     }
@@ -243,16 +262,18 @@ const Komunitas = () => {
     return post.likes.some(id => id === uid);
   };
 
-  const getRoleEmoji = (role: string) => {
-    if (role === "admin") return "🛡️";
-    if (role === "mentor") return "👨‍🏫";
-    return "👤";
+  const getInitial = (name: string) => {
+    return name ? name.charAt(0).toUpperCase() : "?";
   };
 
   const currentUserId = getUserId();
 
   return (
     <div className="komunitas-page">
+      {toast && (
+        <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
+      )}
+
       {/* HERO */}
       <section className="komunitas-hero">
         <h2>Komunitas Trader 🌍</h2>
@@ -391,8 +412,11 @@ const Komunitas = () => {
 
               {/* Author */}
               <div className="post-header">
-                <div className="post-avatar">
-                  {post.role === "admin" ? "🛡️" : "👨‍🏫"}
+                <div
+                  className="post-avatar"
+                  style={{ background: getAvatarGradient(post.authorName || "U") }}
+                >
+                  {getInitial(post.authorName)}
                 </div>
                 <div className="post-meta">
                   <strong>{post.authorName}</strong>
@@ -458,7 +482,12 @@ const Komunitas = () => {
                       {commentsData[post._id].map(c => (
                         <div key={c._id} className="comment-item">
                           <div className="comment-header">
-                            <span className="comment-avatar">{getRoleEmoji(c.role)}</span>
+                            <span
+                              className="comment-avatar"
+                              style={{ background: getAvatarGradient(c.authorName || "U") }}
+                            >
+                              {getInitial(c.authorName)}
+                            </span>
                             <strong className="comment-name">{c.authorName}</strong>
                             <span className="comment-role">{c.role}</span>
                             <span className="comment-time">{timeAgo(c.createdAt)}</span>

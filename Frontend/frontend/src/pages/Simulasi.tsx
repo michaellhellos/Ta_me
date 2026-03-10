@@ -1,11 +1,13 @@
 import { useEffect, useState, useCallback } from "react";
 import {
-  LineChart,
-  Line,
+  AreaChart,
+  Area,
   ResponsiveContainer,
   Tooltip,
   XAxis,
+  YAxis,
 } from "recharts";
+import Toast from "./Toast";
 import "./Simulasi.css";
 
 /* ================= TYPES ================= */
@@ -14,6 +16,7 @@ type Coin = {
   name: string;
   symbol: string;
   current_price: number;
+  image?: string;
 };
 
 type ChartPoint = {
@@ -33,7 +36,28 @@ type SimulasiProps = {
   coin?: Coin | null;
 };
 
+type ToastData = {
+  message: string;
+  type: "success" | "error" | "info";
+} | null;
+
 const API = "http://localhost:5000/api/trade";
+
+/* ── Custom Chart Tooltip ── */
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="custom-tooltip">
+      <span className="tooltip-time">{label}</span>
+      <strong className="tooltip-price">
+        ${Number(payload[0].value).toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })}
+      </strong>
+    </div>
+  );
+};
 
 const Simulasi: React.FC<SimulasiProps> = ({ coin }) => {
   const [tab, setTab] = useState<"simulasi" | "riwayat">("simulasi");
@@ -49,6 +73,8 @@ const Simulasi: React.FC<SimulasiProps> = ({ coin }) => {
   const [amount, setAmount] = useState<number>(100);
   const [history, setHistory] = useState<Transaction[]>([]);
 
+  const [toast, setToast] = useState<ToastData>(null);
+
   /* ================= FETCH COINS ================= */
   useEffect(() => {
     fetch(`${API}/coins`)
@@ -59,7 +85,9 @@ const Simulasi: React.FC<SimulasiProps> = ({ coin }) => {
           setSelectedCoin(coin ?? json.data[0]);
         }
       })
-      .catch(() => alert("Gagal mengambil data coin"));
+      .catch(() =>
+        setToast({ message: "Gagal mengambil data coin", type: "error" })
+      );
   }, [coin]);
 
   /* ================= FETCH CHART ================= */
@@ -78,22 +106,22 @@ const Simulasi: React.FC<SimulasiProps> = ({ coin }) => {
     const token = localStorage.getItem("token");
     if (!token) return;
 
-      try {
-        const res = await fetch(`${API}/history`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+    try {
+      const res = await fetch(`${API}/history`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-        const data = await res.json();
+      const data = await res.json();
 
-        setHistory(
-          data.transactions ||
-          data.data ||
-          data.user?.transactions ||
-          []
-        );
-      } catch {
-        alert("Gagal mengambil riwayat transaksi");
-      }
+      setHistory(
+        data.transactions ||
+        data.data ||
+        data.user?.transactions ||
+        []
+      );
+    } catch {
+      setToast({ message: "Gagal mengambil riwayat transaksi", type: "error" });
+    }
   }, []);
 
   useEffect(() => {
@@ -107,13 +135,13 @@ const Simulasi: React.FC<SimulasiProps> = ({ coin }) => {
     if (!selectedCoin || loadingTrade) return;
 
     if (amount <= 0 || isNaN(amount)) {
-      alert("Jumlah tidak valid");
+      setToast({ message: "Jumlah tidak valid", type: "error" });
       return;
     }
 
     const token = localStorage.getItem("token");
     if (!token) {
-      alert("Silakan login ulang");
+      setToast({ message: "Silakan login ulang", type: "error" });
       return;
     }
 
@@ -140,15 +168,20 @@ const Simulasi: React.FC<SimulasiProps> = ({ coin }) => {
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data.message || "Transaksi gagal");
+        setToast({ message: data.message || "Transaksi gagal", type: "error" });
       } else {
-        alert(mode === "buy" ? "Berhasil membeli!" : "Berhasil menjual!");
+        setToast({
+          message: mode === "buy"
+            ? `Berhasil membeli ${selectedCoin.symbol.toUpperCase()}! 🎉`
+            : `Berhasil menjual ${selectedCoin.symbol.toUpperCase()}! 💰`,
+          type: "success",
+        });
         setAmount(100);
         setTab("riwayat");
         await fetchHistory();
       }
     } catch {
-      alert("Server error");
+      setToast({ message: "Server error, coba lagi nanti", type: "error" });
     } finally {
       setLoadingTrade(false);
     }
@@ -160,6 +193,15 @@ const Simulasi: React.FC<SimulasiProps> = ({ coin }) => {
 
   return (
     <div className="sim-page">
+      {/* TOAST */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
+
       {/* ================= TABS ================= */}
       <div className="sim-tabs">
         <span
@@ -203,16 +245,41 @@ const Simulasi: React.FC<SimulasiProps> = ({ coin }) => {
             </div>
           </div>
 
-          <div className="chart-wrapper" style={{ height: 320 }}>
+          <div className="chart-wrapper">
             {loadingChart ? (
-              <p>Loading chart...</p>
+              <div className="chart-skeleton">
+                <div className="skeleton chart-skeleton-area" />
+              </div>
             ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData}>
-                  <XAxis dataKey="time" />
-                  <Tooltip />
-                  <Line dataKey="price" stroke="#22e6a8" dot={false} />
-                </LineChart>
+              <ResponsiveContainer width="100%" height={320}>
+                <AreaChart data={chartData}>
+                  <defs>
+                    <linearGradient id="priceGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#22c55e" stopOpacity={0.25} />
+                      <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <XAxis
+                    dataKey="time"
+                    tick={{ fill: "#64748b", fontSize: 11 }}
+                    axisLine={{ stroke: "rgba(255,255,255,0.06)" }}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    hide
+                    domain={["dataMin", "dataMax"]}
+                  />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Area
+                    type="monotone"
+                    dataKey="price"
+                    stroke="#22c55e"
+                    strokeWidth={2}
+                    fill="url(#priceGradient)"
+                    dot={false}
+                    activeDot={{ r: 5, fill: "#22c55e", stroke: "#020617", strokeWidth: 2 }}
+                  />
+                </AreaChart>
               </ResponsiveContainer>
             )}
           </div>
