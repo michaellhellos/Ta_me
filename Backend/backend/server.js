@@ -31,6 +31,7 @@ const path = require("path");
 const http = require("http");
 const { Server } = require("socket.io");
 const connectDB = require("./config/db");
+const Message = require("./models/Message");
 require("dotenv").config();
 
 const app = express();
@@ -81,14 +82,30 @@ io.on("connection", (socket) => {
     socket.join(conversationId);
   });
 
-  // Kirim pesan real-time
+  // Kirim pesan real-time (socket.to = exclude sender → no duplicate)
   socket.on("send_message", (data) => {
-    io.to(data.conversationId).emit("receive_message", data);
+    socket.to(data.conversationId).emit("receive_message", data);
   });
 
-  // Update status read
-  socket.on("message_read", (data) => {
+  // Update status read — persist ke DB
+  socket.on("message_read", async (data) => {
+    try {
+      if (data.messageId) {
+        await Message.findByIdAndUpdate(data.messageId, { isRead: true });
+      }
+    } catch (err) {
+      console.error("READ UPDATE ERROR:", err.message);
+    }
     io.to(data.conversationId).emit("message_read_update", data);
+  });
+
+  // Typing indicator
+  socket.on("typing", (data) => {
+    socket.to(data.conversationId).emit("user_typing", data);
+  });
+
+  socket.on("stop_typing", (data) => {
+    socket.to(data.conversationId).emit("user_stop_typing", data);
   });
 
   socket.on("disconnect", () => {
