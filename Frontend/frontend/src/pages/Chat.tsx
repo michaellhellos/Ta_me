@@ -103,6 +103,7 @@ const Chat = () => {
 
   const token = localStorage.getItem("token");
   const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const myId = user.id || user._id;
 
   /* ── Auto-scroll ── */
   const scrollToBottom = useCallback(() => {
@@ -128,7 +129,7 @@ const Chat = () => {
           );
           if (conv?.participants) {
             const partner = conv.participants.find(
-              (p: any) => p._id !== user._id
+              (p: any) => p._id !== myId
             );
             if (partner) {
               setChatPartner({
@@ -234,7 +235,7 @@ const Chat = () => {
       });
 
       // Stop typing
-      socket.emit("stop_typing", { conversationId, userId: user._id });
+      socket.emit("stop_typing", { conversationId, userId: myId });
 
       setMessages((prev) => [...prev, newMessage]);
       setText("");
@@ -247,11 +248,11 @@ const Chat = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setText(e.target.value);
 
-    socket.emit("typing", { conversationId, userId: user._id });
+    socket.emit("typing", { conversationId, userId: myId });
 
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     typingTimeoutRef.current = setTimeout(() => {
-      socket.emit("stop_typing", { conversationId, userId: user._id });
+      socket.emit("stop_typing", { conversationId, userId: myId });
     }, 2000);
   };
 
@@ -309,8 +310,8 @@ const Chat = () => {
         {messages.map((msg, idx) => {
           const prev = idx > 0 ? messages[idx - 1] : null;
           const isMe =
-            msg.sender._id === user._id ||
-            (msg.sender as any) === user._id;
+            msg.sender._id === myId ||
+            (msg.sender as any) === myId;
           const showDate = shouldShowDate(msg, prev);
           const isFirst =
             !prev ||
