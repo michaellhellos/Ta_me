@@ -60,3 +60,28 @@ exports.createNilai = async (req, res) => {
     });
   }
 };
+
+exports.getNilaiByUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Format ID tidak valid",
+      });
+    }
+
+    const scores = await Nilai.find({ userId }).select(
+      "materiId score totalSoal"
+    );
+
+    res.json({ success: true, data: scores });
+  } catch (error) {
+    console.error("GET NILAI ERROR:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

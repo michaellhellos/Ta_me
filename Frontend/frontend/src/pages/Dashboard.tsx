@@ -7,6 +7,8 @@ import {
   GraduationCap,
   LogOut,
   ArrowUpRight,
+  Wallet,
+  Coins,
 } from "lucide-react";
 import "./Dashboard.css";
 import Simulasi from "./Simulasi";
@@ -221,6 +223,13 @@ const Dashboard = () => {
 
   const totalAsset = balance + cryptoValue;
 
+  // Best performer (coin with highest profit%)
+  const bestPerformer = portfolioWithPrice.length > 0
+    ? portfolioWithPrice.reduce((best: any, item: any) =>
+      item.profitPercent > (best?.profitPercent || -Infinity) ? item : best
+      , null)
+    : null;
+
   const handleSelectCoin = (coin: any) => {
     setSelectedCoin(coin);
     setMenu("simulasi");
@@ -235,9 +244,26 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="loading-container">
-        <div className="loading-spinner" />
-        <span>Memuat dashboard...</span>
+      <div className="app-wrapper">
+        <header className="header">
+          <div className="header-left">
+            <div className="skeleton" style={{ width: 200, height: 24, borderRadius: 8 }} />
+            <div className="skeleton" style={{ width: 140, height: 14, marginTop: 6, borderRadius: 6 }} />
+          </div>
+          <div className="header-actions">
+            <div className="skeleton" style={{ width: 42, height: 42, borderRadius: '50%' }} />
+          </div>
+        </header>
+        <main className="main-content">
+          <div className="skeleton" style={{ height: 200, borderRadius: 20, marginBottom: 16 }} />
+          <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
+            <div className="skeleton" style={{ flex: 1, height: 48, borderRadius: 14 }} />
+            <div className="skeleton" style={{ flex: 1, height: 48, borderRadius: 14 }} />
+          </div>
+          <div className="skeleton" style={{ height: 52, borderRadius: 16, marginBottom: 16 }} />
+          <div className="skeleton" style={{ height: 180, borderRadius: 20, marginBottom: 16 }} />
+          <div className="skeleton" style={{ height: 300, borderRadius: 20 }} />
+        </main>
       </div>
     );
   }
@@ -266,7 +292,7 @@ const Dashboard = () => {
       {/* MAIN CONTENT */}
       <main className="main-content">
         {menu === "beranda" && (
-          <>
+          <div className="stagger-children beranda-content">
             {/* TOTAL ASSET */}
             <section className="card total-asset no-hover">
               <div className="total-top">
@@ -290,15 +316,35 @@ const Dashboard = () => {
 
               <div className="asset-split">
                 <div>
-                  <span>Uang Virtual</span>
+                  <span className="asset-split-label">
+                    <Wallet size={14} /> Uang Virtual
+                  </span>
                   <strong>${balance.toLocaleString()}</strong>
                 </div>
                 <div>
-                  <span>Aset Kripto</span>
+                  <span className="asset-split-label">
+                    <Coins size={14} /> Aset Kripto
+                  </span>
                   <strong>${cryptoValue.toLocaleString()}</strong>
                 </div>
               </div>
             </section>
+
+            {/* STATS ROW */}
+            <div className="stats-row">
+              <div className="stat-mini">
+                <Coins size={16} />
+                <span>{portfolioWithPrice.length} Aset</span>
+              </div>
+              <div className="stat-mini">
+                <TrendingUp size={16} />
+                <span>
+                  {bestPerformer
+                    ? `${bestPerformer.symbol} ${bestPerformer.profitPercent >= 0 ? "+" : ""}${bestPerformer.profitPercent.toFixed(1)}%`
+                    : "— —%"}
+                </span>
+              </div>
+            </div>
 
             {/* QUICK ACTION */}
             <button
@@ -314,16 +360,21 @@ const Dashboard = () => {
               <div className="section-header">
                 <h3>Portofolio Kamu</h3>
                 {portfolioWithPrice.length > 0 && (
-                  <span className={totalProfitDollar >= 0 ? "green" : "red"}>
+                  <span className={`pl-pill ${totalProfitDollar >= 0 ? "profit" : "loss"}`}>
                     {totalProfitDollar >= 0 ? "+" : ""}${Math.abs(totalProfitDollar).toFixed(2)}
                   </span>
                 )}
               </div>
 
               {portfolioWithPrice.length === 0 && (
-                <p className="empty">
-                  Kamu belum membeli kripto 🚀
-                </p>
+                <div className="portfolio-empty">
+                  <div className="portfolio-empty-icon">📊</div>
+                  <h4>Belum ada aset kripto</h4>
+                  <p>Mulai trading untuk membangun portofoliomu!</p>
+                  <button onClick={() => setMenu("simulasi")}>
+                    Mulai Trading <ArrowUpRight size={16} />
+                  </button>
+                </div>
               )}
 
               {portfolioWithPrice.map((item: any, index) => (
@@ -380,49 +431,41 @@ const Dashboard = () => {
             </section>
 
             {/* MARKET */}
-      <section className="card">
-  <div className="section-header">
-    <h3>Pasar Kripto</h3>
-    <span onClick={() => setMenu("simulasi")}>Lihat Semua →</span>
-  </div>
+            <section className="card">
+              <div className="section-header">
+                <h3>Pasar Kripto <small>(7 teratas)</small></h3>
+                <span onClick={() => setMenu("simulasi")}>Lihat Semua →</span>
+              </div>
 
-  <div className="market-list">
-    {market.slice(0,7).map((coin) => (
-      <div
-        key={coin.id}
-        className="market-card"
-        onClick={() => handleSelectCoin(coin)}
-      >
-        <div className="market-left">
-          <img src={coin.image} className="coin-img-sm" />
+              <div className="market-list">
+                {market.slice(0, 7).map((coin) => (
+                  <div
+                    key={coin.id}
+                    className="market-card"
+                    onClick={() => handleSelectCoin(coin)}
+                  >
+                    <div className="market-left">
+                      <img src={coin.image} className="coin-img-sm" alt={coin.name} />
+                      <div>
+                        <strong>{coin.symbol.toUpperCase()}</strong>
+                        <span>{coin.name}</span>
+                      </div>
+                    </div>
 
-          <div>
-            <strong>{coin.symbol.toUpperCase()}</strong>
-            <span>{coin.name}</span>
+                    <div className="market-right">
+                      <strong>${Number(coin.current_price).toLocaleString()}</strong>
+                      <span
+                        className={coin.price_change_percentage_24h >= 0 ? "green" : "red"}
+                      >
+                        {coin.price_change_percentage_24h >= 0 ? "+" : ""}
+                        {coin.price_change_percentage_24h.toFixed(2)}%
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
           </div>
-        </div>
-
-        <div className="market-right">
-          <strong>
-            ${Number(coin.current_price).toLocaleString()}
-          </strong>
-
-          <span
-            className={
-              coin.price_change_percentage_24h >= 0
-                ? "green"
-                : "red"
-            }
-          >
-            {coin.price_change_percentage_24h >= 0 ? "+" : ""}
-            {coin.price_change_percentage_24h.toFixed(2)}%
-          </span>
-        </div>
-      </div>
-    ))}
-  </div>
-</section>
-          </>
         )}
 
         {menu === "simulasi" && (
