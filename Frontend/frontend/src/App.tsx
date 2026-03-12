@@ -1,3 +1,4 @@
+import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./components/Login";
 import Register from "./components/Register";
@@ -6,12 +7,12 @@ import DashboardAdmin from "./pages/admin/DashboardAdmin";
 import MentorDashboard from "./pages/mentor/MentorDashboard";
 import Chat from "./pages/Chat";
 
-const PrivateRoute = ({ children }: { children: JSX.Element }) => {
+const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
   const token = localStorage.getItem("token");
   return token ? children : <Navigate to="/" />;
 };
 
-const AdminRoute = ({ children }: { children: JSX.Element }) => {
+const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   const user = localStorage.getItem("user");
 
   if (!user) return <Navigate to="/" />;

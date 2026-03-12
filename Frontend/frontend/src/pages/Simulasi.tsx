@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import {
   AreaChart,
   Area,
@@ -8,6 +8,7 @@ import {
   YAxis,
 } from "recharts";
 import Toast from "./Toast";
+import { MousePointer2, Pencil, Type, Trash2 } from "lucide-react";
 import "./Simulasi.css";
 
 /* ================= TYPES ================= */
@@ -26,6 +27,7 @@ type ChartPoint = {
 
 type Transaction = {
   type: "BUY" | "SELL";
+  coinId?: string;
   name: string;
   price: number;
   quantity: number;
@@ -74,6 +76,12 @@ const Simulasi: React.FC<SimulasiProps> = ({ coin }) => {
   const [history, setHistory] = useState<Transaction[]>([]);
 
   const [toast, setToast] = useState<ToastData>(null);
+
+  /* ================= DRAWING STATE ================= */
+  const [drawMode, setDrawMode] = useState<"none" | "draw" | "text">("none");
+  const [isDrawing, setIsDrawing] = useState(false);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
 
   /* ================= FETCH COINS ================= */
   useEffect(() => {
@@ -129,6 +137,82 @@ const Simulasi: React.FC<SimulasiProps> = ({ coin }) => {
       fetchHistory();
     }
   }, [tab, fetchHistory]);
+
+  /* ================= CANVAS DRAWING SETUP ================= */
+  useEffect(() => {
+    if (!canvasRef.current || tab !== "simulasi" || loadingChart) return;
+    
+    // setTimeout agar dirender setelah render frame flex yang sesungguhnya di chart-wrapper 
+    const initCanvas = setTimeout(() => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      
+      const parent = canvas.parentElement;
+      if (parent) {
+        canvas.width = parent.clientWidth;
+        canvas.height = parent.clientHeight;
+      }
+
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = "#22c55e"; // warna green accent profit
+        ctx.font = "14px Inter, sans-serif";
+        ctx.fillStyle = "#e2e8f0"; // text primary
+        ctxRef.current = ctx;
+      }
+    }, 100);
+
+    return () => clearTimeout(initCanvas);
+  }, [selectedCoin, tab, loadingChart]);
+
+  /* ================= CANVAS HANDLERS ================= */
+  const startDrawingAction = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (drawMode === "none") return;
+
+    const { nativeEvent } = e;
+    const ctx = ctxRef.current;
+    const x = nativeEvent.offsetX;
+    const y = nativeEvent.offsetY;
+
+    if (drawMode === "draw" && ctx) {
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      setIsDrawing(true);
+    } else if (drawMode === "text" && ctx) {
+      const textToInject = prompt("Masukkan Teks Anotasi Grafik:");
+      if (textToInject) {
+        ctx.fillText(textToInject, x, y);
+      }
+      setDrawMode("none");
+    }
+  };
+
+  const drawAction = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!isDrawing || drawMode !== "draw") return;
+    const ctx = ctxRef.current;
+    if (ctx) {
+      ctx.lineTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
+      ctx.stroke();
+    }
+  };
+
+  const stopDrawingAction = () => {
+    if (isDrawing && ctxRef.current) {
+      ctxRef.current.closePath();
+    }
+    setIsDrawing(false);
+  };
+
+  const clearCanvasAction = () => {
+    const canvas = canvasRef.current;
+    const ctx = ctxRef.current;
+    if (canvas && ctx) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  };
 
   /* ================= HANDLE TRADE ================= */
   const handleTrade = async () => {
@@ -246,6 +330,37 @@ const Simulasi: React.FC<SimulasiProps> = ({ coin }) => {
           </div>
 
           <div className="chart-wrapper">
+            <div className="drawing-toolbar">
+              <button
+                className={`tool-btn ${drawMode === "none" ? "active" : ""}`}
+                onClick={() => setDrawMode("none")}
+                title="Pointer / Tooltip Aktif"
+              >
+                <MousePointer2 size={16} />
+              </button>
+              <button
+                className={`tool-btn ${drawMode === "draw" ? "active" : ""}`}
+                onClick={() => setDrawMode("draw")}
+                title="Coretan Garis Bebas"
+              >
+                <Pencil size={16} />
+              </button>
+              <button
+                className={`tool-btn ${drawMode === "text" ? "active" : ""}`}
+                onClick={() => setDrawMode("text")}
+                title="Tulis Teks Anotasi"
+              >
+                <Type size={16} />
+              </button>
+              <div className="tool-divider"></div>
+              <button
+                className="tool-btn danger"
+                onClick={clearCanvasAction}
+                title="Bersihkan Semua Coretan"
+              >
+                <Trash2 size={16} />
+              </button>
+            </div>
             {loadingChart ? (
               <div className="chart-skeleton">
                 <div className="skeleton chart-skeleton-area" />
@@ -281,6 +396,18 @@ const Simulasi: React.FC<SimulasiProps> = ({ coin }) => {
                   />
                 </AreaChart>
               </ResponsiveContainer>
+            )}
+
+            {/* KANVAS OVERLAY DRAWING */}
+            {!loadingChart && (
+              <canvas
+                ref={canvasRef}
+                className={`drawing-canvas ${drawMode !== "none" ? "active-draw" : "disabled-draw"}`}
+                onMouseDown={startDrawingAction}
+                onMouseMove={drawAction}
+                onMouseUp={stopDrawingAction}
+                onMouseLeave={stopDrawingAction}
+              />
             )}
           </div>
 
@@ -339,7 +466,9 @@ const Simulasi: React.FC<SimulasiProps> = ({ coin }) => {
           )}
 
           {history.map((tx, i) => {
-            const currentPrice = selectedCoin.current_price;
+            const txCoinMatch = coins.find((c) => c.id === tx.coinId || c.name === tx.name);
+            const currentPrice = txCoinMatch ? txCoinMatch.current_price : tx.price;
+
             const profit =
               tx.type === "BUY"
                 ? (currentPrice - tx.price) * tx.quantity
