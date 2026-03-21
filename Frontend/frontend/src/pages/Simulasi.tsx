@@ -133,10 +133,16 @@ const Simulasi: React.FC<SimulasiProps> = ({ coin }) => {
   }, []);
 
   useEffect(() => {
-    if (tab === "riwayat") {
-      fetchHistory();
+    fetchHistory();
+  }, [fetchHistory]);
+
+  const ownedQuantity = history.reduce((acc, trx) => {
+    if (trx.coinId === selectedCoin?.id || trx.name === selectedCoin?.name) {
+      if (trx.type === "BUY") return acc + trx.quantity;
+      if (trx.type === "SELL") return acc - trx.quantity;
     }
-  }, [tab, fetchHistory]);
+    return acc;
+  }, 0);
 
   /* ================= CANVAS DRAWING SETUP ================= */
   useEffect(() => {
@@ -436,11 +442,26 @@ const Simulasi: React.FC<SimulasiProps> = ({ coin }) => {
               onChange={(e) => setAmount(Number(e.target.value))}
             />
 
-            {mode === "buy" && (
+            {mode === "buy" ? (
               <small>
                 ≈ {estimatedQty.toFixed(6)}{" "}
                 {selectedCoin.symbol.toUpperCase()}
               </small>
+            ) : (
+              <>
+                <div 
+                  className="owned-balance" 
+                  onClick={() => setAmount(Number(ownedQuantity.toFixed(6)))}
+                >
+                  Tersedia: {ownedQuantity.toFixed(6)} {selectedCoin.symbol.toUpperCase()}
+                </div>
+                <div className="percent-buttons">
+                  <button onClick={() => setAmount(Number((ownedQuantity * 0.25).toFixed(6)))}>25%</button>
+                  <button onClick={() => setAmount(Number((ownedQuantity * 0.50).toFixed(6)))}>50%</button>
+                  <button onClick={() => setAmount(Number((ownedQuantity * 0.75).toFixed(6)))}>75%</button>
+                  <button className="max-btn" onClick={() => setAmount(Number(ownedQuantity.toFixed(6)))}>Max</button>
+                </div>
+              </>
             )}
 
             <button

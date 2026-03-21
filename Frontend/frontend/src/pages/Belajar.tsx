@@ -99,6 +99,11 @@ const Belajar = () => {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [schedulesLoading, setSchedulesLoading] = useState(true);
 
+  // Redeem System State
+  const [redeemedXp, setRedeemedXp] = useState<number>(0);
+  const [showRedeemModal, setShowRedeemModal] = useState<boolean>(false);
+  const [isRedeeming, setIsRedeeming] = useState<boolean>(false);
+
   // ── Fetch all data on mount ──
   useEffect(() => {
     const userData = localStorage.getItem("user");
@@ -125,6 +130,9 @@ const Belajar = () => {
               map[n.materiId] = n;
             });
             setNilaiMap(map);
+            if (data.redeemedXp) {
+              setRedeemedXp(data.redeemedXp);
+            }
           }
         })
         .catch((err) => console.error(err));
@@ -146,6 +154,33 @@ const Belajar = () => {
     const updatedAnswers = [...answers];
     updatedAnswers[quizIndex] = optionIndex;
     setAnswers(updatedAnswers);
+  };
+
+  const handleRedeem = async (amount: number) => {
+    const userData = localStorage.getItem("user");
+    if (!userData) return;
+    const user = JSON.parse(userData);
+
+    setIsRedeeming(true);
+    try {
+      const response = await fetch("http://localhost:5000/api/nilai/redeem", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user._id, amountXp: amount }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        setRedeemedXp(data.redeemedXp);
+        setToast({ message: data.message, type: "success" });
+        setShowRedeemModal(false);
+      } else {
+        setToast({ message: data.message, type: "error" });
+      }
+    } catch (err) {
+      setToast({ message: "Gagal menghubungkan ke server", type: "error" });
+    } finally {
+      setIsRedeeming(false);
+    }
   };
 
   const submitQuiz = async () => {
@@ -226,11 +261,45 @@ const Belajar = () => {
     : 0;
   const totalCount = selectedMateri?.quizzes.length || 0;
 
+  // Derived state to separate completed and pending quizzes
+  const completedMateri = materiList.filter((m) => nilaiMap[m._id]);
+  const pendingMateri = materiList.filter((m) => !nilaiMap[m._id]);
+
   // Total XP accumulated
-  const totalXp = Object.values(nilaiMap).reduce((sum, n) => sum + n.score, 0);
+  const totalEarnedXp = Object.values(nilaiMap).reduce((sum, n) => sum + n.score, 0);
+  const availableXp = totalEarnedXp - redeemedXp;
 
   return (
     <div className="belajar-page">
+      {/* =============== REDEEM MODAL =============== */}
+      {showRedeemModal && (
+        <div className="redeem-modal-overlay">
+          <div className="redeem-modal-box">
+            <h3>Tukar XP dengan Uang! 💸</h3>
+            <p>Pilih paket redeem di bawah untuk mengisi saldo balance Anda.</p>
+            
+            <div className="redeem-options">
+              <button 
+                onClick={() => handleRedeem(10)} 
+                disabled={availableXp < 10 || isRedeeming}
+              >
+                🎁 Tukar 10 XP → $100
+              </button>
+              <button 
+                onClick={() => handleRedeem(100)} 
+                disabled={availableXp < 100 || isRedeeming}
+              >
+                💎 Tukar 100 XP → $1000
+              </button>
+            </div>
+
+            <button className="close-modal-btn" onClick={() => setShowRedeemModal(false)} disabled={isRedeeming}>
+              Tutup
+            </button>
+          </div>
+        </div>
+      )}
+
       {toast && (
         <Toast
           message={toast.message}
@@ -269,10 +338,15 @@ const Belajar = () => {
       {activeTab === "quiz" && !selectedMateri && (
         <>
           {/* Total XP summary */}
-          {totalXp > 0 && (
-            <div className="xp-summary">
-              <span className="xp-summary-value">{totalXp} XP</span>
-              <span className="xp-summary-label">Total dikumpulkan</span>
+          {totalEarnedXp > 0 && (
+            <div className="xp-summary clickable" onClick={() => setShowRedeemModal(true)}>
+              <div className="xp-summary-left">
+                <span className="xp-summary-value">{availableXp} XP</span>
+                <span className="xp-summary-label">Tersedia (Klik untuk Tukar)</span>
+              </div>
+              <div className="xp-summary-right">
+                🎁 Tukar
+              </div>
             </div>
           )}
 
@@ -289,47 +363,66 @@ const Belajar = () => {
             </div>
           )}
 
-          {/* Empty state */}
-          {!loading && materiList.length === 0 && (
-            <div className="belajar-empty">
-              <BookOpen size={48} />
-              <h3>Belum Ada Materi</h3>
-              <p>Nantikan update materi edukasi dari mentor!</p>
-            </div>
-          )}
-
-          {/* Materi list */}
-          {!loading && materiList.length > 0 && (
-            <div className="belajar-list">
-              {materiList.map((materi) => {
-                const nilai = nilaiMap[materi._id];
-                return (
-                  <div
-                    key={materi._id}
-                    className="belajar-card"
-                    onClick={() => {
-                      setSelectedMateri(materi);
-                      setAnswers([]);
-                      setXp(null);
-                      setSubmitted(false);
-                    }}
-                  >
-                    <h4>{materi.title}</h4>
-                    <p>{materi.summary}</p>
-                    <div className="belajar-card-footer">
-                      <span className="quiz-badge">
-                        <FileQuestion />
-                        {materi.quizzes.length} Soal
-                      </span>
-                      {nilai && (
-                        <span className="xp-badge">
-                          ✅ {nilai.score} XP
-                        </span>
-                      )}
-                    </div>
+          {/* Quiz Sections */}
+          {!loading && (
+            <div className="belajar-content-wrapper">
+              
+              {/* 1. Riwayat Quiz Selesai */}
+              {completedMateri.length > 0 && (
+                <div className="completed-quizzes-section">
+                  <h3 className="section-title">✅ Quiz Selesai</h3>
+                  <div className="completed-quizzes-list">
+                    {completedMateri.map((materi) => (
+                      <div 
+                        key={materi._id} 
+                        className="completed-quiz-item"
+                        onClick={() => setShowRedeemModal(true)}
+                        title="Klik untuk Redeem XP"
+                      >
+                        <span className="cq-title">{materi.title}</span>
+                        <span className="cq-score">+{nilaiMap[materi._id].score} XP</span>
+                      </div>
+                    ))}
                   </div>
-                );
-              })}
+                </div>
+              )}
+
+              {/* 2. Quiz Tersedia */}
+              <div className="pending-quizzes-section">
+                <h3 className="section-title">📝 Quiz Tersedia</h3>
+                {pendingMateri.length === 0 ? (
+                  <div className="belajar-empty">
+                    <BookOpen size={48} />
+                    <h3>Semua Quiz Telah Diselesaikan!</h3>
+                    <p>Nantikan update materi edukasi dari mentor!</p>
+                  </div>
+                ) : (
+                  <div className="belajar-list">
+                    {pendingMateri.map((materi) => (
+                      <div
+                        key={materi._id}
+                        className="belajar-card"
+                        onClick={() => {
+                          setSelectedMateri(materi);
+                          setAnswers([]);
+                          setXp(null);
+                          setSubmitted(false);
+                        }}
+                      >
+                        <h4>{materi.title}</h4>
+                        <p>{materi.summary}</p>
+                        <div className="belajar-card-footer">
+                          <span className="quiz-badge">
+                            <FileQuestion />
+                            {materi.quizzes.length} Soal
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
             </div>
           )}
         </>
@@ -418,14 +511,15 @@ const Belajar = () => {
                 🎉 Selamat! Kamu mendapatkan {xp} experience points
               </p>
               <button
-                className="quiz-retry-btn"
+                className="quiz-finish-btn"
                 onClick={() => {
+                  setSelectedMateri(null);
                   setAnswers([]);
                   setXp(null);
                   setSubmitted(false);
                 }}
               >
-                Coba Lagi
+                Kembali ke Daftar Quiz
               </button>
             </div>
           )}

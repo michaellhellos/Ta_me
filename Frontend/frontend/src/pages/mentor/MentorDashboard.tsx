@@ -71,6 +71,17 @@ const MentorDashboard: React.FC = () => {
   const [studentCount, setStudentCount] = useState(0);
   const [chatCount, setChatCount] = useState(0);
 
+  // Mentor Profile State
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [updatingProfile, setUpdatingProfile] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editEmail, setEditEmail] = useState("");
+  const [editPassword, setEditPassword] = useState("");
+  const [editSpecialization, setEditSpecialization] = useState("");
+  const [editExperience, setEditExperience] = useState<number | "">("");
+  const [editBio, setEditBio] = useState("");
+  const [editStyle, setEditStyle] = useState("");
+
   // Schedule state
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [showForm, setShowForm] = useState(false);
@@ -96,8 +107,11 @@ const MentorDashboard: React.FC = () => {
 
     if (!token) return;
 
-    // Fetch live stats
+    // Fetch profile and live stats
     Promise.all([
+      axios.get("http://localhost:5000/api/user/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
       axios.get("http://localhost:5000/api/trade/mentor/students", {
         headers: { Authorization: `Bearer ${token}` },
       }),
@@ -105,7 +119,17 @@ const MentorDashboard: React.FC = () => {
         headers: { Authorization: `Bearer ${token}` },
       }),
     ])
-      .then(([studentsRes, chatsRes]) => {
+      .then(([userRes, studentsRes, chatsRes]) => {
+        const u = userRes.data;
+        if (u) {
+          setMentorName(u.name || "Mentor");
+          setEditName(u.name || "");
+          setEditEmail(u.email || "");
+          setEditSpecialization(u.specialization || "");
+          setEditExperience(u.experience || "");
+          setEditBio(u.bio || "");
+          setEditStyle(u.style || "");
+        }
         setStudentCount(studentsRes.data?.data?.length || 0);
         setChatCount(chatsRes.data?.data?.length || 0);
       })
@@ -179,6 +203,44 @@ const MentorDashboard: React.FC = () => {
     }
   };
 
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setUpdatingProfile(true);
+    try {
+      const res = await fetch("http://localhost:5000/api/user/profile", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          name: editName,
+          email: editEmail,
+          password: editPassword,
+          specialization: editSpecialization,
+          bio: editBio,
+          experience: Number(editExperience),
+          style: editStyle
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setMentorName(data.data.name);
+        setShowProfileModal(false);
+        setEditPassword(""); 
+        alert("Profil berhasil diperbarui!");
+      } else {
+        alert(data.message || "Gagal memperbarui profil");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Terjadi kesalahan sistem.");
+    } finally {
+      setUpdatingProfile(false);
+    }
+  };
+
   const initial = mentorName ? mentorName.charAt(0).toUpperCase() : "M";
   const upcomingCount = schedules.filter(
     (s) => new Date(s.date) >= new Date()
@@ -191,7 +253,9 @@ const MentorDashboard: React.FC = () => {
         <div className="profile">
           <div
             className="avatar"
-            style={{ background: getGradient(mentorName || "Mentor") }}
+            style={{ background: getGradient(mentorName || "Mentor"), cursor: "pointer" }}
+            onClick={() => setShowProfileModal(true)}
+            title="Pengaturan Profil Mentor"
           >
             {initial}
           </div>
@@ -200,17 +264,6 @@ const MentorDashboard: React.FC = () => {
             <span className="subtitle">MENTOR DASHBOARD</span>
           </div>
         </div>
-
-        <button
-          className="logout-btn"
-          onClick={() => {
-            localStorage.clear();
-            window.location.href = "/";
-          }}
-        >
-          <LogOut size={16} />
-          LOGOUT
-        </button>
       </div>
 
       {/* NAVIGATION */}
@@ -251,7 +304,7 @@ const MentorDashboard: React.FC = () => {
         <>
           {/* STATS */}
           <div className="stats">
-            <div className="stat-card">
+            <div className="stat-card" style={{ cursor: "pointer" }} onClick={() => setMenu("siswa")}>
               <Users size={22} />
               <div>
                 <p>Total Siswa</p>
@@ -259,7 +312,7 @@ const MentorDashboard: React.FC = () => {
               </div>
             </div>
 
-            <div className="stat-card">
+            <div className="stat-card" style={{ cursor: "pointer" }} onClick={() => setMenu("qna")}>
               <MessageCircle size={22} />
               <div>
                 <p>Inbox Chat</p>
@@ -428,6 +481,67 @@ const MentorDashboard: React.FC = () => {
           <Createforum onPostCreated={handlePostCreated} />
           <MentorForumFeed refreshKey={forumRefreshKey} />
         </>
+      )}
+
+      {/* MODAL PROFIL & LOGOUT MENTOR */}
+      {showProfileModal && (
+        <div className="profile-modal-overlay" onClick={() => setShowProfileModal(false)}>
+          <div className="profile-modal-box mentor-profile-box" onClick={(e) => e.stopPropagation()}>
+            <div className="profile-modal-header">
+              <h2>Pengaturan Profil Mentor</h2>
+              <button className="close-btn" onClick={() => setShowProfileModal(false)}>×</button>
+            </div>
+
+            <form className="profile-form mentor-profile-form" onSubmit={handleUpdateProfile}>
+              <div className="form-row-2">
+                <div className="profile-form-group">
+                  <label>Nama Lengkap</label>
+                  <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)} required />
+                </div>
+                <div className="profile-form-group">
+                  <label>Email</label>
+                  <input type="email" value={editEmail} onChange={(e) => setEditEmail(e.target.value)} required />
+                </div>
+              </div>
+
+              <div className="form-row-2">
+                <div className="profile-form-group">
+                  <label>Spesialisasi</label>
+                  <input type="text" placeholder="Mis: Technical Analysis" value={editSpecialization} onChange={(e) => setEditSpecialization(e.target.value)} />
+                </div>
+                <div className="profile-form-group">
+                  <label>Pengalaman (Tahun)</label>
+                  <input type="number" min="0" placeholder="Mis: 5" value={editExperience} onChange={(e) => setEditExperience(e.target.value ? Number(e.target.value) : "")} />
+                </div>
+              </div>
+
+              <div className="profile-form-group">
+                <label>Gaya Trading / Mengajar</label>
+                <input type="text" placeholder="Mis: Scalper, Swing Trader" value={editStyle} onChange={(e) => setEditStyle(e.target.value)} />
+              </div>
+
+              <div className="profile-form-group">
+                <label>Bio Singkat</label>
+                <textarea rows={3} placeholder="Ceritakan pengalaman trading Anda" value={editBio} onChange={(e) => setEditBio(e.target.value)} />
+              </div>
+
+              <div className="profile-form-group mentor-password-group">
+                <label>Password Baru <small>(opsional)</small></label>
+                <input type="password" placeholder="Kosongkan jika tidak ingin mengubah" value={editPassword} onChange={(e) => setEditPassword(e.target.value)} />
+              </div>
+
+              <button type="submit" className="profile-save-btn" disabled={updatingProfile}>
+                {updatingProfile ? "Menyimpan..." : "Simpan Perubahan Profil"}
+              </button>
+            </form>
+
+            <div className="profile-modal-footer">
+              <button className="logout-modal-btn" onClick={() => { localStorage.clear(); window.location.href = "/"; }}>
+                <LogOut size={16} /> Keluar dari Dashboard
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

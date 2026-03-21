@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
-import "./MentorDashboard.css";
+import "../mentor/MentorDashboard.css"; // Reuse modern Qna styling
 
 const socket = io("http://localhost:5000");
 
@@ -19,7 +19,7 @@ interface Conversation {
   lastMessageAt?: string;
 }
 
-const Qna: React.FC = () => {
+const AdminInbox: React.FC = () => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
@@ -76,7 +76,7 @@ const Qna: React.FC = () => {
         const convExists = prev.find((c) => c._id === data.conversationId);
         
         if (!convExists) {
-          // If it's a completely new chat, refetch the whole list to show it
+          // If it's a completely new ticket/chat, refetch the whole list to show it
           fetchConversations();
           return prev;
         }
@@ -99,66 +99,17 @@ const Qna: React.FC = () => {
   }, [token]);
 
   const handleOpenChat = (conversationId: string) => {
+    // Navigate safely across standard Router (matches exactly how User/Mentor works)
     navigate(`/chat/${conversationId}`);
-  };
-
-  const handleContactAdmin = async () => {
-    try {
-      setLoading(true);
-      // 1. Get Admin _id
-      const adminRes = await axios.get("http://localhost:5000/api/auth/user?role=admin");
-      if (adminRes.data.success && adminRes.data.data.length > 0) {
-        const adminId = adminRes.data.data[0]._id;
-        
-        // 2. Create/Get chat conversation
-        const convRes = await axios.post(
-          "http://localhost:5000/api/chat/conversation",
-          { receiverId: adminId },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-
-        if (convRes.data.success) {
-          navigate(`/chat/${convRes.data.data._id}`);
-        }
-      } else {
-        setError("Gagal menghubungi admin: akun admin tidak ditemukan.");
-      }
-    } catch (err) {
-      console.error("CONTACT ADMIN ERROR:", err);
-      setError("Gagal menghubungi admin.");
-    } finally {
-      setLoading(false);
-    }
   };
 
   return (
     <div className="qna-container">
 
       {/* TITLE */}
-      <div className="qna-title" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <h2>Inbox Chat Siswa</h2>
-          <span className="qna-badge">Total {conversations.length}</span>
-        </div>
-        <button 
-          onClick={handleContactAdmin}
-          style={{
-            background: "linear-gradient(135deg, #a855f7, #c084fc)",
-            color: "white",
-            border: "none",
-            padding: "8px 16px",
-            borderRadius: "20px",
-            fontWeight: 600,
-            cursor: "pointer",
-            fontSize: "13px",
-            boxShadow: "0 4px 14px rgba(168, 85, 247, 0.3)",
-            transition: "all 0.2s"
-          }}
-          onMouseOver={(e) => e.currentTarget.style.transform = "translateY(-2px)"}
-          onMouseOut={(e) => e.currentTarget.style.transform = "none"}
-        >
-          🎧 Hubungi Admin Support
-        </button>
+      <div className="qna-title">
+        <h2>Pesan Masuk (Bantuan Mentor/Siswa)</h2>
+        <span className="qna-badge">Total {conversations.length}</span>
       </div>
 
       {loading && (
@@ -170,13 +121,13 @@ const Qna: React.FC = () => {
       )}
 
       {!loading && conversations.length === 0 && (
-        <div className="qna-empty">Belum ada percakapan masuk.</div>
+        <div className="qna-empty">Admin belum memiliki pesan masuk.</div>
       )}
 
       {/* LIST CONVERSATION */}
       {!loading &&
         conversations.map((conv) => {
-          const student = conv.participants.find(
+          const partner = conv.participants.find(
             (p) => p._id !== user?.id && p._id !== user?._id
           );
 
@@ -185,7 +136,7 @@ const Qna: React.FC = () => {
               <div className="qna-card-top">
                 <div>
                   <span className="qna-name">
-                    {student?.name || "User"}
+                    {partner?.name || "Anonymous User"} <span style={{fontSize: '11px', background: 'rgba(99, 102, 241, 0.2)', padding: '2px 8px', borderRadius: '10px', marginLeft: '6px', color: '#818cf8'}}>{partner?.role && partner.role.toUpperCase()}</span>
                   </span>
                   <span className="qna-time">
                     {conv.lastMessageAt
@@ -198,11 +149,11 @@ const Qna: React.FC = () => {
                   className="qna-btn"
                   onClick={() => handleOpenChat(conv._id)}
                 >
-                  BALAS 💬
+                  BALAS TIKET 💬
                 </button>
               </div>
 
-              <div className="qna-preview">
+              <div className="qna-preview" style={{borderLeft: '3px solid #6366f1'}}>
                 {conv.lastMessage || "Mulai percakapan..."}
               </div>
             </div>
@@ -212,4 +163,4 @@ const Qna: React.FC = () => {
   );
 };
 
-export default Qna;
+export default AdminInbox;

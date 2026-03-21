@@ -15,6 +15,10 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 1000000
   },
+  redeemedXp: {
+    type: Number,
+    default: 0
+  },
   specialization: String,
   bio: String,
   experience: Number,

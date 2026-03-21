@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, Fragment, useCallback } from "react";
+import React, { useEffect, useState, useRef, Fragment, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { io } from "socket.io-client";
@@ -101,9 +101,15 @@ const Chat = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const token = localStorage.getItem("token");
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
-  const myId = user.id || user._id;
+  const token = React.useMemo(() => localStorage.getItem("token"), []);
+  const user = React.useMemo(() => {
+    try {
+      return JSON.parse(localStorage.getItem("user") || "{}");
+    } catch {
+      return {};
+    }
+  }, []);
+  const myId = React.useMemo(() => user?.id || user?._id, [user]);
 
   /* ── Auto-scroll ── */
   const scrollToBottom = useCallback(() => {

@@ -197,6 +197,13 @@
 }
 
 /* ================= CHART ================= */
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 24px;
+  animation: fadeSlideUp 0.6s var(--ease-out);
+}
+
 .chart-box {
   background: var(--card-bg);
   backdrop-filter: var(--card-blur);
@@ -205,12 +212,32 @@
   padding: 24px;
   border-radius: var(--card-radius);
   box-shadow: var(--card-shadow);
+  display: flex;
+  flex-direction: column;
 }
 
 .chart-box h3 {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
+  color: var(--text-primary);
+  text-align: center;
+}
+
+.canvas-container {
+  position: relative;
+  width: 100%;
+  height: 250px;
+  flex: 1;
+}
+
+.line-chart-container {
+  margin-top: 24px;
+  width: 100%;
+}
+
+.line-chart-container .canvas-container {
+  height: 320px;
 }
 
 /* ================= RESPONSIVE ================= */

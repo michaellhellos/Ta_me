@@ -64,6 +64,8 @@ router.post("/message", auth, async (req, res) => {
       text
     });
 
+    const populatedMessage = await Message.findById(message._id).populate("sender", "name role");
+
     await Conversation.findByIdAndUpdate(conversationId, {
       lastMessage: text,
       lastMessageAt: new Date()
@@ -71,7 +73,7 @@ router.post("/message", auth, async (req, res) => {
 
     res.json({
       success: true,
-      data: message
+      data: populatedMessage
     });
 
   } catch (error) {

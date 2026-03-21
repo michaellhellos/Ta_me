@@ -45,6 +45,28 @@ app.use(express.json({ limit: "10mb" }));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 /* =========================
+   API TRACKING MIDDLEWARE
+========================= */
+const ApiStat = require("./models/ApiStat");
+
+app.use("/api", (req, res, next) => {
+  res.on("finish", async () => {
+    try {
+      // Create local date string (YYYY-MM-DD)
+      const today = new Date().toLocaleDateString('en-CA');
+      await ApiStat.findOneAndUpdate(
+        { date: today },
+        { $inc: { count: 1 } },
+        { upsert: true, new: true }
+      );
+    } catch (err) {
+      console.error("API STAT TRACKING ERROR:", err.message);
+    }
+  });
+  next();
+});
+
+/* =========================
    ROUTES (TIDAK DIUBAH)
 ========================= */
 app.use("/api/auth", require("./routes/auth"));
@@ -58,6 +80,7 @@ app.use("/api/chat", require("./routes/chatRoutes"));
 app.use("/api/nilai", require("./routes/nilaiRoutes"));
 app.use("/api/community", require("./routes/community"));
 app.use("/api/schedule", require("./routes/schedule"));
+app.use("/api/admin", require("./routes/admin"));
 
 /* =========================
    SOCKET.IO SETUP

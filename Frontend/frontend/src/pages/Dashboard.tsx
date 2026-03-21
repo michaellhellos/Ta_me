@@ -65,6 +65,13 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [selectedCoin, setSelectedCoin] = useState<any>(null);
 
+  // Profile Update State
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editEmail, setEditEmail] = useState("");
+  const [editPassword, setEditPassword] = useState("");
+  const [updatingProfile, setUpdatingProfile] = useState(false);
+
   const API = "http://localhost:5000/api/trade";
 
   // ================= FETCH DATA =================
@@ -108,6 +115,8 @@ const Dashboard = () => {
 
         setBalance(Number(userData?.balance) || 0);
         setUserName(userData?.name || "");
+        setEditName(userData?.name || "");
+        setEditEmail(userData?.email || "");
 
         setHistory(
           historyData.transactions ||
@@ -240,6 +249,41 @@ const Dashboard = () => {
     window.location.href = "/";
   };
 
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setUpdatingProfile(true);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch("http://localhost:5000/api/user/profile", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          name: editName,
+          email: editEmail,
+          password: editPassword,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setUserName(data.data.name);
+        setShowProfileModal(false);
+        setEditPassword(""); // clear password field
+        alert("Profil berhasil diperbarui!");
+      } else {
+        alert(data.message || "Gagal memperbarui profil");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Terjadi kesalahan sistem.");
+    } finally {
+      setUpdatingProfile(false);
+    }
+  };
+
   const initial = userName ? userName.charAt(0).toUpperCase() : "?";
 
   if (loading) {
@@ -279,13 +323,12 @@ const Dashboard = () => {
         <div className="header-actions">
           <div
             className="avatar"
-            style={{ background: getAvatarGradient(userName || "User") }}
+            style={{ background: getAvatarGradient(userName || "User"), cursor: "pointer" }}
+            onClick={() => setShowProfileModal(true)}
+            title="Pengaturan Profil"
           >
             {initial}
           </div>
-          <button className="logout-btn" onClick={handleLogout} title="Logout">
-            <LogOut />
-          </button>
         </div>
       </header>
 
@@ -494,6 +537,58 @@ const Dashboard = () => {
       </nav>
 
       {showIntro && <Onboarding onComplete={handleIntroComplete} />}
+
+      {/* MODAL PROFIL & LOGOUT */}
+      {showProfileModal && (
+        <div className="profile-modal-overlay" onClick={() => setShowProfileModal(false)}>
+          <div className="profile-modal-box" onClick={(e) => e.stopPropagation()}>
+            <div className="profile-modal-header">
+              <h2>Pengaturan Profil</h2>
+              <button className="close-btn" onClick={() => setShowProfileModal(false)}>×</button>
+            </div>
+
+            <form className="profile-form" onSubmit={handleUpdateProfile}>
+              <div className="profile-form-group">
+                <label>Nama Lengkap</label>
+                <input
+                  type="text"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="profile-form-group">
+                <label>Email</label>
+                <input
+                  type="email"
+                  value={editEmail}
+                  onChange={(e) => setEditEmail(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="profile-form-group">
+                <label>Password Baru <small>(opsional)</small></label>
+                <input
+                  type="password"
+                  placeholder="Kosongkan jika tidak ingin mengubah"
+                  value={editPassword}
+                  onChange={(e) => setEditPassword(e.target.value)}
+                />
+              </div>
+
+              <button type="submit" className="profile-save-btn" disabled={updatingProfile}>
+                {updatingProfile ? "Menyimpan..." : "Simpan Perubahan"}
+              </button>
+            </form>
+
+            <div className="profile-modal-footer">
+              <button className="logout-modal-btn" onClick={handleLogout}>
+                <LogOut size={16} /> Keluar dari Akun
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
