@@ -496,282 +496,442 @@
   }
 }
 
-/* ---------- PORTFOLIO CARD + DETAIL ---------- */
-.portfolio-card {
-  margin-top: 12px;
-  border-radius: 16px;
-  background: rgba(30, 41, 59, 0.35);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--card-border);
-  overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
-
-.portfolio-card:hover {
-  transform: translateY(-3px);
-  background: rgba(30, 41, 59, 0.6);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-}
-
-/* Trend indicator — left border accent */
-.portfolio-card.trend-up {
-  border-left: 3px solid var(--accent);
-}
-
-.portfolio-card.trend-up:hover {
-  box-shadow: -4px 0 20px rgba(34, 197, 94, 0.2), 0 10px 30px rgba(0, 0, 0, 0.4);
-}
-
-.portfolio-card.trend-down {
-  border-left: 3px solid var(--danger);
-}
-
-.portfolio-card.trend-down:hover {
-  box-shadow: -4px 0 20px rgba(239, 68, 68, 0.2), 0 10px 30px rgba(0, 0, 0, 0.4);
-}
-
-.portfolio-card .portfolio-item {
-  margin-top: 0;
-  border-radius: 0;
-  background: transparent;
-  border: none;
-}
-
-.portfolio-card .portfolio-item:hover {
-  transform: none;
-  box-shadow: none;
-  background: transparent;
-}
-
-.portfolio-detail {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  padding: 0 18px 14px;
-  background: transparent;
-}
-
-.portfolio-detail>div {
+/* ---------- BERANDA CONTENT (NEW LAYOUT) ---------- */
+.beranda-content {
   display: flex;
   flex-direction: column;
-  padding: 10px 12px;
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 10px;
-  margin: 0 2px;
+  gap: 32px;
 }
 
-.portfolio-detail small {
-  font-size: 11px;
-  color: var(--text-muted);
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-  margin-bottom: 4px;
-}
-
-.portfolio-detail span {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-/* ---------- PORTFOLIO EMPTY STATE ---------- */
-.portfolio-empty {
-  text-align: center;
-  padding: 40px 24px;
-}
-
-.portfolio-empty-icon {
-  font-size: 48px;
-  margin-bottom: 12px;
-}
-
-.portfolio-empty h4 {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 6px;
-}
-
-.portfolio-empty p {
-  font-size: 13px;
-  color: var(--text-muted);
-  margin-bottom: 20px;
-}
-
-.portfolio-empty button {
-  padding: 10px 24px;
-  background: var(--gradient-brand);
-  border: none;
-  border-radius: 12px;
-  color: white;
-  font-size: 14px;
-  font-weight: 600;
-  font-family: inherit;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  transition: var(--transition-normal);
-}
-
-.portfolio-empty button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
-}
-
-/* ---------- P/L PILL (SECTION HEADER) ---------- */
-.pl-pill {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.pl-pill.profit {
-  background: rgba(34, 197, 94, 0.1);
-  border: 1px solid rgba(34, 197, 94, 0.2);
-  color: var(--accent);
-}
-
-.pl-pill.loss {
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.2);
-  color: var(--danger);
-}
-
-/* ---------- STATS ROW ---------- */
-.stats-row {
+/* ---------- 1. HERO SECTION: THE KINETIC VAULT ---------- */
+.total-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: 24px;
+  background: var(--surface-1);
+  padding: 48px;
   display: flex;
-  gap: 12px;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  min-height: 280px;
 }
 
-.stat-mini {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 16px;
-  background: var(--card-bg);
-  backdrop-filter: var(--card-blur);
-  -webkit-backdrop-filter: var(--card-blur);
-  border: 1px solid var(--card-border);
-  border-radius: 14px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-secondary);
-  box-shadow: var(--card-shadow);
+.hero-bg-accent {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 50%;
+  height: 100%;
+  opacity: 0.2;
+  pointer-events: none;
 }
 
-.stat-mini svg {
-  color: var(--primary);
-  flex-shrink: 0;
+.hero-gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to left, var(--primary-glow), transparent);
 }
 
-/* ---------- BERANDA CONTENT ---------- */
-.beranda-content {
+.hero-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 10;
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-.beranda-content .card {
-  margin-bottom: 0;
-}
-
-.user-info-box {
-  display: flex;
-  justify-content: space-between;
-  background: #111827;
-  padding: 16px;
-  border-radius: 12px;
-  margin-bottom: 16px;
-}
-
-.user-info-box div {
-  display: flex;
-  flex-direction: column;
-}
-
-.user-info-box span {
-  font-size: 12px;
-  opacity: 0.7;
-}
-
-.user-info-box strong {
+.hero-label {
   font-size: 14px;
-  margin-top: 4px;
+  font-weight: 800;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--primary);
+  opacity: 0.8;
 }
 
-/* MARKET CARD */
-.market-card {
+.hero-balance {
+  font-size: 4.5rem;
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  line-height: 1;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.hero-decimal {
+  color: rgba(105, 218, 255, 0.6);
+}
+
+.hero-stats {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 16px 18px;
-  border-radius: 14px;
-  background: rgba(30, 41, 59, 0.35);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--card-border);
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.hero-pl-badge {
+  padding: 4px 12px;
+  border-radius: 50px;
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.hero-pl-badge.profit {
+  background: rgba(34, 197, 94, 0.1);
+  color: var(--accent);
+}
+
+.hero-pl-badge.loss {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--danger);
+}
+
+.hero-split-text {
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.hero-action {
+  position: relative;
+  z-index: 10;
+  align-self: flex-start;
+  margin-top: 32px;
+}
+
+.hero-btn {
+  position: relative;
+  padding: 20px 40px;
+  border-radius: 12px;
+  background: var(--primary);
+  color: #004a5d;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  border: none;
   cursor: pointer;
 }
 
-.market-card:hover {
-  transform: translateY(-3px);
-  background: rgba(30, 41, 59, 0.6);
-  border-color: rgba(99, 102, 241, 0.3);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(99, 102, 241, 0.15);
+.hero-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 30px rgba(56, 189, 248, 0.4);
 }
 
-/* LEFT SIDE */
-.market-left {
+.hero-btn:active {
+  transform: scale(0.95);
+}
+
+.hero-btn-glare {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to right, transparent, rgba(255,255,255,0.3), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.7s ease;
+}
+
+.hero-btn:hover .hero-btn-glare {
+  transform: translateX(100%);
+}
+
+/* ---------- 2. PORTFOLIO BENTO ---------- */
+.portfolio-section {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.section-header-alt {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.section-header-alt h2 {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.view-all-btn {
+  color: var(--primary);
+  font-size: 14px;
+  font-weight: 700;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.view-all-btn:hover {
+  text-decoration: underline;
+}
+
+.portfolio-h-scroll {
+  display: flex;
+  gap: 24px;
+  overflow-x: auto;
+  padding-bottom: 16px;
+  margin: 0 -8px;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+.portfolio-empty-bento {
+  padding: 40px;
+  text-align: center;
+  color: var(--text-muted);
+  width: 100%;
+  background: var(--surface-1);
+  border-radius: 20px;
+  border: 1px dashed var(--card-border);
+}
+
+.bento-card {
+  flex: 0 0 auto;
+  min-width: 280px;
+  padding: 24px;
+  border-radius: 20px;
+  background: var(--card-bg);
+  backdrop-filter: var(--card-blur);
+  -webkit-backdrop-filter: var(--card-blur);
+  border: 1px solid var(--card-border);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+}
+
+.bento-card:hover {
+  border-color: rgba(56, 189, 248, 0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+}
+
+.bento-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+}
+
+.bento-coin-info {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.market-left strong {
-  font-size: 14px;
+.bento-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  overflow: hidden;
 }
 
-.market-left p {
+.bento-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.bg-accent-dim { background: rgba(34, 197, 94, 0.15); color: var(--accent); }
+.bg-danger-dim { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+
+.bento-name {
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.bento-symbol {
   font-size: 12px;
   color: var(--text-muted);
 }
 
-/* RIGHT SIDE */
-.market-right {
-  text-align: right;
+.bento-sparkline {
+  width: 64px;
+  height: 32px;
 }
 
-.market-right strong {
-  display: block;
-  font-size: 14px;
+.bento-price {
+  font-size: 24px;
+  font-weight: 900;
+  margin-bottom: 4px;
 }
 
-.market-right span {
-  font-size: 13px;
+.bento-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+}
+
+.bento-balance {
+  color: var(--text-secondary);
+}
+
+.bento-change {
+  font-weight: 700;
+}
+
+.stroke-primary { stroke: var(--primary); }
+.stroke-danger { stroke: var(--danger); }
+
+/* ---------- 3. GRID LAYOUT ---------- */
+.dashboard-grid-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 32px;
+}
+
+@media (min-width: 1024px) {
+  .dashboard-grid-layout {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+
+.dashboard-grid-main {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.timeframe-tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.timeframe-tabs button {
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 6px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: all 0.2s;
+}
+
+.timeframe-tabs button.active {
+  background: var(--surface-1);
+  color: var(--primary);
+}
+
+.timeframe-tabs button:hover:not(.active) {
+  background: var(--surface-1);
+}
+
+/* MARKET TABLE */
+.market-table-container {
+  background: var(--card-bg);
+  backdrop-filter: var(--card-blur);
+  -webkit-backdrop-filter: var(--card-blur);
+  border-radius: 20px;
+  border: 1px solid var(--card-border);
+  overflow-x: auto;
+}
+
+.market-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.market-table th {
+  padding: 16px 24px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--card-border);
   font-weight: 600;
 }
 
-.market-cap-label {
-  display: block;
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--text-muted);
-  margin-top: 2px;
+.market-table td {
+  padding: 24px;
 }
 
-.market-list {
+.market-table-row {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+  transition: background 0.2s;
+  cursor: pointer;
+}
+
+.market-table-row:last-child {
+  border-bottom: none;
+}
+
+.market-table-row:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.table-coin {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.table-coin-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.table-coin-icon img {
+  width: 20px;
+  height: 20px;
+}
+
+.coin-name {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.coin-symbol {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.font-mono {
+  font-family: monospace;
+}
+
+.text-right {
+  text-align: right;
+}
+
+@media (max-width: 640px) {
+  .hide-mobile {
+    display: none;
+  }
+  .hero-balance {
+    font-size: 2.8rem;
+  }
+}
+
+.dashboard-grid-sidebar {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 24px;
 }
+
 
 /* ---------- MODALS (PROFILE POPUP & PORTFOLIO POPUP) ---------- */
 .profile-modal-overlay,

@@ -6,11 +6,7 @@ import {
   Users,
   GraduationCap,
   LogOut,
-  ArrowUpRight,
-  Wallet,
-  Coins,
-  Briefcase,
-  BarChart3,
+  TrendingDown,
 } from "lucide-react";
 import "./Dashboard.css";
 import Simulasi from "./Simulasi";
@@ -248,12 +244,7 @@ const Dashboard = () => {
 
   const totalAsset = balance + cryptoValue;
 
-  // Best performer (coin with highest profit%)
-  const bestPerformer = portfolioWithPrice.length > 0
-    ? portfolioWithPrice.reduce((best: any, item: any) =>
-      item.profitPercent > (best?.profitPercent || -Infinity) ? item : best
-      , null)
-    : null;
+
 
   const handleSelectCoin = (coin: any) => {
     setSelectedCoin(coin);
@@ -361,196 +352,154 @@ const Dashboard = () => {
       <main className="main-content">
         {menu === "beranda" && (
           <div className="stagger-children beranda-content">
-            {/* TOTAL ASSET */}
-            <section className="card total-asset no-hover">
-              <div className="total-top">
-                <div>
-                  <p>Total Aset Virtual</p>
-                  <h2>${totalAsset.toLocaleString()}</h2>
+            {/* HERO SECTION: THE KINETIC VAULT */}
+            <section className="total-hero relative-container">
+              <div className="hero-bg-accent">
+                <div className="hero-gradient"></div>
+                <svg className="hero-svg w-full" preserveAspectRatio="none" viewBox="0 0 400 200">
+                  <path d="M0 150 Q 100 80 200 120 T 400 50" fill="none" stroke="var(--primary)" strokeWidth="2"></path>
+                </svg>
+              </div>
+              
+              <div className="hero-content">
+                <p className="hero-label">TOTAL VIRTUAL BALANCE</p>
+                <h1 className="hero-balance">
+                  ${Math.floor(totalAsset).toLocaleString()}<span className="hero-decimal">.{(totalAsset % 1).toFixed(2).substring(2)}</span>
+                </h1>
+                
+                <div className="hero-stats">
+                  {portfolioWithPrice.length > 0 && (
+                    <span className={`hero-pl-badge ${totalProfitDollar >= 0 ? "profit" : "loss"}`}>
+                      {totalProfitDollar >= 0 ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
+                      {totalProfitDollar >= 0 ? "+" : ""}{totalProfitPercent.toFixed(2)}%
+                    </span>
+                  )}
+                  <span className="hero-split-text">vs modal awal</span>
                 </div>
               </div>
 
-              {/* P/L Badge */}
-              {portfolioWithPrice.length > 0 && (
-                <div className={`pl-badge ${totalProfitDollar >= 0 ? "profit" : "loss"}`}>
-                  <span className="pl-dollar">
-                    {totalProfitDollar >= 0 ? "+" : ""}${Math.abs(totalProfitDollar).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </span>
-                  <span className="pl-percent">
-                    ({totalProfitPercent >= 0 ? "+" : ""}{totalProfitPercent.toFixed(2)}%)
-                  </span>
-                </div>
-              )}
-
-              <div className="asset-split">
-                <div>
-                  <span className="asset-split-label">
-                    <Wallet size={14} /> Uang Virtual
-                  </span>
-                  <strong>${balance.toLocaleString()}</strong>
-                </div>
-                <div>
-                  <span className="asset-split-label">
-                    <Coins size={14} /> Aset Kripto
-                  </span>
-                  <strong>${cryptoValue.toLocaleString()}</strong>
-                </div>
+              <div className="hero-action">
+                <button className="hero-btn" onClick={() => setMenu("simulasi")}>
+                  <span>Start Trading</span>
+                  <div className="hero-btn-glare"></div>
+                </button>
               </div>
             </section>
 
-            {/* STATS ROW */}
-            <div className="stats-row">
-              <div className="stat-mini">
-                <Coins size={16} />
-                <span>{portfolioWithPrice.length} Aset</span>
+            {/* PORTFOLIO BENTO */}
+            <section className="portfolio-section">
+              <div className="section-header-alt">
+                <h2>Portfolio Assets</h2>
+                <button className="view-all-btn" onClick={() => setShowAllPortfolio(true)}>View All</button>
               </div>
-              <div className="stat-mini">
-                <TrendingUp size={16} />
-                <span>
-                  {bestPerformer
-                    ? `${bestPerformer.symbol} ${bestPerformer.profitPercent >= 0 ? "+" : ""}${bestPerformer.profitPercent.toFixed(1)}%`
-                    : "— —%"}
-                </span>
+              
+              <div className="portfolio-h-scroll no-scrollbar">
+                {portfolioWithPrice.length === 0 ? (
+                  <div className="portfolio-empty-bento">
+                    <p>Belum ada aset kripto. Mulai trading sekarang!</p>
+                  </div>
+                ) : (
+                  portfolioWithPrice.map((item: any, index) => (
+                    <div key={index} className={`bento-card ${item.profitDollar >= 0 ? "trend-up" : "trend-down"}`}>
+                      <div className="bento-top">
+                        <div className="bento-coin-info">
+                          <div className={`bento-icon ${item.profitDollar >= 0 ? "bg-accent-dim" : "bg-danger-dim"}`}>
+                            {item.image ? (
+                              <img src={item.image} alt={item.name} />
+                            ) : (
+                              <span>{item.symbol?.[0] || "?"}</span>
+                            )}
+                          </div>
+                          <div>
+                            <p className="bento-name">{item.name}</p>
+                            <p className="bento-symbol">{item.symbol}</p>
+                          </div>
+                        </div>
+                        <div className="bento-sparkline">
+                           <svg viewBox="0 0 100 40" className={item.profitDollar >= 0 ? "stroke-primary" : "stroke-danger"}>
+                             {item.profitDollar >= 0 
+                               ? <path d="M0 30 Q 20 10 40 25 T 80 5 T 100 20" fill="none" strokeWidth="2"></path>
+                               : <path d="M0 10 Q 30 40 60 20 T 100 35" fill="none" strokeWidth="2"></path>
+                             }
+                           </svg>
+                        </div>
+                      </div>
+                      <p className="bento-price">${formatPrice(item.currentPrice)}</p>
+                      <div className="bento-footer">
+                        <span className="bento-balance">Balance: {item.quantity.toFixed(4)} {item.symbol}</span>
+                        <span className={`bento-change ${item.profitPercent >= 0 ? "green" : "red"}`}>
+                          {item.profitPercent >= 0 ? "+" : ""}{item.profitPercent.toFixed(2)}%
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </section>
+
+            {/* GRID LAYOUT FOR MARKET AND NEWS */}
+            <div className="dashboard-grid-layout">
+              {/* LIVE MARKET TABLE */}
+              <div className="dashboard-grid-main">
+                <div className="section-header-alt">
+                  <h2>Market Overview</h2>
+                  <div className="timeframe-tabs">
+                    <button className="active">24h</button>
+                    <button onClick={() => setMenu("simulasi")}>7d</button>
+                  </div>
+                </div>
+                
+                <div className="market-table-container">
+                  <table className="market-table">
+                    <thead>
+                      <tr>
+                        <th>Asset</th>
+                        <th className="text-right">Price</th>
+                        <th className="text-right hide-mobile">Market Cap</th>
+                        <th className="text-right">Change (24h)</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {market.slice(0, 7).map((coin) => (
+                        <tr key={coin.id} className="market-table-row" onClick={() => handleSelectCoin(coin)}>
+                          <td>
+                            <div className="table-coin">
+                              <div className="table-coin-icon bg-surface-2">
+                                {coin.image ? <img src={coin.image} alt={coin.name} /> : <span>{coin.symbol[0]}</span>}
+                              </div>
+                              <div>
+                                <p className="coin-name">{coin.name}</p>
+                                <p className="coin-symbol">{coin.symbol.toUpperCase()}</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="text-right font-mono font-bold">${formatPrice(Number(coin.current_price))}</td>
+                          <td className="text-right text-muted hide-mobile">
+                            {coin.market_cap >= 1e12 ? `$${(coin.market_cap / 1e12).toFixed(1)}T`
+                              : coin.market_cap >= 1e9 ? `$${(coin.market_cap / 1e9).toFixed(1)}B`
+                              : `$${(coin.market_cap / 1e6).toFixed(1)}M`}
+                          </td>
+                          <td className="text-right">
+                            <span className={`font-bold ${coin.price_change_percentage_24h >= 0 ? "green" : "red"}`}>
+                              {coin.price_change_percentage_24h >= 0 ? "+" : ""}
+                              {coin.price_change_percentage_24h.toFixed(2)}%
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* CRYPTO NEWS */}
+              <div className="dashboard-grid-sidebar">
+                <div className="section-header-alt">
+                  <h2>Market Intel</h2>
+                </div>
+                <CryptoNewsWidget />
               </div>
             </div>
-
-            {/* QUICK ACTION */}
-            <button
-              className="quick-action-btn"
-              onClick={() => setMenu("simulasi")}
-            >
-              <span>Mulai Trading</span>
-              <ArrowUpRight />
-            </button>
-
-            {/* PORTOFOLIO */}
-            <section className="card no-hover">
-              <div className="section-header">
-                <h3><Briefcase size={18} /> Portofolio Kamu</h3>
-                <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-                  {portfolioWithPrice.length > 0 && (
-                    <span className={`pl-pill ${totalProfitDollar >= 0 ? "profit" : "loss"}`}>
-                      {totalProfitDollar >= 0 ? "+" : ""}${Math.abs(totalProfitDollar).toFixed(2)}
-                    </span>
-                  )}
-                  {portfolioWithPrice.length > 3 && (
-                    <span 
-                      onClick={() => setShowAllPortfolio(true)} 
-                      style={{ cursor: "pointer", fontSize: "13px", fontWeight: 600, color: "var(--primary)" }}
-                    >
-                      Lihat Semua →
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {portfolioWithPrice.length === 0 && (
-                <div className="portfolio-empty">
-                  <div className="portfolio-empty-icon">📊</div>
-                  <h4>Belum ada aset kripto</h4>
-                  <p>Mulai trading untuk membangun portofoliomu!</p>
-                  <button onClick={() => setMenu("simulasi")}>
-                    Mulai Trading <ArrowUpRight size={16} />
-                  </button>
-                </div>
-              )}
-
-              {portfolioWithPrice.slice(0, 3).map((item: any, index) => (
-                <div key={index} className={`portfolio-card ${item.profitDollar >= 0 ? "trend-up" : "trend-down"}`}>
-                  <div className="portfolio-item">
-                    <div className="left">
-                      {item.image ? (
-                        <img src={item.image} alt={item.name} className="coin-img" />
-                      ) : (
-                        <span className="coin">
-                          {item.symbol?.[0] || "?"}
-                        </span>
-                      )}
-                      <div>
-                        <strong>{item.name}</strong>
-                        <p>
-                          {item.quantity.toFixed(6)} {item.symbol}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="right">
-                      <strong>
-                        ${formatPrice(item.totalValue)}
-                      </strong>
-                      <span className={`profit-dollar ${item.profitDollar >= 0 ? "green" : "red"}`}>
-                        {item.profitDollar >= 0 ? "+" : ""}${Math.abs(item.profitDollar).toFixed(2)}
-                      </span>
-                      <small className={`profit-percent ${item.profitPercent >= 0 ? "green" : "red"}`}>
-                        ({item.profitPercent >= 0 ? "+" : ""}{item.profitPercent.toFixed(2)}%)
-                      </small>
-                    </div>
-                  </div>
-
-                  <div className="portfolio-detail">
-                    <div>
-                      <small>Harga Beli Rata²</small>
-                      <span>${formatPrice(item.avgBuyPrice)}</span>
-                    </div>
-                    <div>
-                      <small>Harga Sekarang</small>
-                      <span>${formatPrice(item.currentPrice)}</span>
-                    </div>
-                    <div>
-                      <small>Modal</small>
-                      <span>${formatPrice(item.invested)}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </section>
-
-            {/* MARKET */}
-            <section className="card no-hover">
-              <div className="section-header">
-                <h3><BarChart3 size={18} /> Pasar Kripto <small>(7 teratas)</small></h3>
-                <span onClick={() => setMenu("simulasi")}>Lihat Semua →</span>
-              </div>
-
-              <div className="market-list">
-                {market.slice(0, 7).map((coin) => (
-                  <div
-                    key={coin.id}
-                    className="market-card"
-                    onClick={() => handleSelectCoin(coin)}
-                  >
-                    <div className="market-left">
-                      <img src={coin.image} className="coin-img-sm" alt={coin.name} />
-                      <div>
-                        <strong>{coin.symbol.toUpperCase()}</strong>
-                        <span>{coin.name}</span>
-                      </div>
-                    </div>
-
-                    <div className="market-right">
-                      <strong>${formatPrice(Number(coin.current_price))}</strong>
-                      {coin.market_cap && (
-                        <span className="market-cap-label">
-                          MCap: ${coin.market_cap >= 1e12
-                            ? `${(coin.market_cap / 1e12).toFixed(1)}T`
-                            : coin.market_cap >= 1e9
-                              ? `${(coin.market_cap / 1e9).toFixed(1)}B`
-                              : `${(coin.market_cap / 1e6).toFixed(1)}M`}
-                        </span>
-                      )}
-                      <span
-                        className={coin.price_change_percentage_24h >= 0 ? "green" : "red"}
-                      >
-                        {coin.price_change_percentage_24h >= 0 ? "+" : ""}
-                        {coin.price_change_percentage_24h.toFixed(2)}%
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            <CryptoNewsWidget />
           </div>
         )}
 
