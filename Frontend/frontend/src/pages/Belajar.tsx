@@ -120,8 +120,9 @@ const Belajar = () => {
       .finally(() => setLoading(false));
 
     // Fetch user's XP scores
-    if (user?._id) {
-      fetch(`http://localhost:5000/api/nilai/user/${user._id}`)
+    const currentUserId = user?._id || user?.id;
+    if (currentUserId) {
+      fetch(`http://localhost:5000/api/nilai/user/${currentUserId}`)
         .then((res) => res.json())
         .then((data) => {
           if (data.success) {
@@ -160,13 +161,14 @@ const Belajar = () => {
     const userData = localStorage.getItem("user");
     if (!userData) return;
     const user = JSON.parse(userData);
+    const redeemUserId = user._id || user.id;
 
     setIsRedeeming(true);
     try {
       const response = await fetch("http://localhost:5000/api/nilai/redeem", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: user._id, amountXp: amount }),
+        body: JSON.stringify({ userId: redeemUserId, amountXp: amount }),
       });
       const data = await response.json();
       if (data.success) {
@@ -214,7 +216,12 @@ const Belajar = () => {
     }
 
     const parsedUser = JSON.parse(userData);
-    const userId = parsedUser._id;
+    const userId = parsedUser._id || parsedUser.id;
+
+    if (!userId) {
+      setToast({ message: "Sesi tidak valid, harap login ulang", type: "error" });
+      return;
+    }
 
     try {
       setSubmitting(true);
@@ -280,16 +287,16 @@ const Belajar = () => {
             
             <div className="redeem-options">
               <button 
-                onClick={() => handleRedeem(10)} 
-                disabled={availableXp < 10 || isRedeeming}
+                onClick={() => handleRedeem(40)} 
+                disabled={availableXp < 40 || isRedeeming}
               >
-                🎁 Tukar 10 XP → $100
+                🎁 Tukar 40 XP → $5,000
               </button>
               <button 
-                onClick={() => handleRedeem(100)} 
-                disabled={availableXp < 100 || isRedeeming}
+                onClick={() => handleRedeem(80)} 
+                disabled={availableXp < 80 || isRedeeming}
               >
-                💎 Tukar 100 XP → $1000
+                💎 Tukar 80 XP → $12,000
               </button>
             </div>
 
@@ -386,6 +393,21 @@ const Belajar = () => {
                   </div>
                 </div>
               )}
+
+              {/* XP Point Display */}
+              <div className="xp-point-card">
+                <div className="xp-point-left">
+                  <span className="xp-point-icon">⭐</span>
+                  <div className="xp-point-info">
+                    <span className="xp-point-value">{totalEarnedXp} XP</span>
+                    <span className="xp-point-label">Total Dikumpulkan</span>
+                  </div>
+                </div>
+                <div className="xp-point-stats">
+                  <span className="xp-point-completed">{completedMateri.length} selesai</span>
+                  <span className="xp-point-pending">{pendingMateri.length} tersisa</span>
+                </div>
+              </div>
 
               {/* 2. Quiz Tersedia */}
               <div className="pending-quizzes-section">

@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema({
 
   balance: {
     type: Number,
-    default: 1000000
+    default: 1000
   },
   redeemedXp: {
     type: Number,

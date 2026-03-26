@@ -95,8 +95,8 @@ exports.redeemXp = async (req, res) => {
     
     // Convert logic
     let reward = 0;
-    if (amountXp === 10) reward = 100;
-    else if (amountXp === 100) reward = 1000;
+    if (amountXp === 40) reward = 5000;
+    else if (amountXp === 80) reward = 12000;
     else return res.status(400).json({ success: false, message: "Opsi redeem tidak valid" });
 
     const scores = await Nilai.find({ userId });

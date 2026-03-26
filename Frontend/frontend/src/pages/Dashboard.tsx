@@ -9,6 +9,8 @@ import {
   ArrowUpRight,
   Wallet,
   Coins,
+  Briefcase,
+  BarChart3,
 } from "lucide-react";
 import "./Dashboard.css";
 import Simulasi from "./Simulasi";
@@ -17,6 +19,7 @@ import Komunitas from "./Komunitas";
 import Ai from "./Ai";
 import Onboarding from "./Onboarding";
 import CryptoNewsWidget from "../components/CryptoNewsWidget";
+import Toast from "./Toast";
 
 type Menu = "beranda" | "simulasi" | "belajar" | "komunitas" | "mentor";
 
@@ -35,6 +38,16 @@ const getGreeting = () => {
   if (hour < 15) return "Selamat Siang";
   if (hour < 18) return "Selamat Sore";
   return "Selamat Malam";
+};
+
+const formatPrice = (price: number): string => {
+  if (price >= 1) {
+    return price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  } else if (price >= 0.01) {
+    return price.toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+  } else {
+    return price.toLocaleString(undefined, { minimumFractionDigits: 6, maximumFractionDigits: 6 });
+  }
 };
 
 const avatarGradients = [
@@ -65,9 +78,11 @@ const Dashboard = () => {
 
   const [loading, setLoading] = useState(true);
   const [selectedCoin, setSelectedCoin] = useState<any>(null);
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
 
   // Profile Update State
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showAllPortfolio, setShowAllPortfolio] = useState(false);
   const [editName, setEditName] = useState("");
   const [editEmail, setEditEmail] = useState("");
   const [editPassword, setEditPassword] = useState("");
@@ -273,13 +288,13 @@ const Dashboard = () => {
         setUserName(data.data.name);
         setShowProfileModal(false);
         setEditPassword(""); // clear password field
-        alert("Profil berhasil diperbarui!");
+        setToast({ message: "Profil berhasil diperbarui!", type: "success" });
       } else {
-        alert(data.message || "Gagal memperbarui profil");
+        setToast({ message: data.message || "Gagal memperbarui profil", type: "error" });
       }
     } catch (error) {
       console.error(error);
-      alert("Terjadi kesalahan sistem.");
+      setToast({ message: "Terjadi kesalahan sistem.", type: "error" });
     } finally {
       setUpdatingProfile(false);
     }
@@ -315,6 +330,15 @@ const Dashboard = () => {
 
   return (
     <div className="app-wrapper">
+      {/* TOAST */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
+
       {/* HEADER */}
       <header className="header">
         <div className="header-left">
@@ -400,14 +424,24 @@ const Dashboard = () => {
             </button>
 
             {/* PORTOFOLIO */}
-            <section className="card">
+            <section className="card no-hover">
               <div className="section-header">
-                <h3>Portofolio Kamu</h3>
-                {portfolioWithPrice.length > 0 && (
-                  <span className={`pl-pill ${totalProfitDollar >= 0 ? "profit" : "loss"}`}>
-                    {totalProfitDollar >= 0 ? "+" : ""}${Math.abs(totalProfitDollar).toFixed(2)}
-                  </span>
-                )}
+                <h3><Briefcase size={18} /> Portofolio Kamu</h3>
+                <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+                  {portfolioWithPrice.length > 0 && (
+                    <span className={`pl-pill ${totalProfitDollar >= 0 ? "profit" : "loss"}`}>
+                      {totalProfitDollar >= 0 ? "+" : ""}${Math.abs(totalProfitDollar).toFixed(2)}
+                    </span>
+                  )}
+                  {portfolioWithPrice.length > 3 && (
+                    <span 
+                      onClick={() => setShowAllPortfolio(true)} 
+                      style={{ cursor: "pointer", fontSize: "13px", fontWeight: 600, color: "var(--primary)" }}
+                    >
+                      Lihat Semua →
+                    </span>
+                  )}
+                </div>
               </div>
 
               {portfolioWithPrice.length === 0 && (
@@ -421,8 +455,8 @@ const Dashboard = () => {
                 </div>
               )}
 
-              {portfolioWithPrice.map((item: any, index) => (
-                <div key={index} className="portfolio-card">
+              {portfolioWithPrice.slice(0, 3).map((item: any, index) => (
+                <div key={index} className={`portfolio-card ${item.profitDollar >= 0 ? "trend-up" : "trend-down"}`}>
                   <div className="portfolio-item">
                     <div className="left">
                       {item.image ? (
@@ -442,32 +476,29 @@ const Dashboard = () => {
 
                     <div className="right">
                       <strong>
-                        ${item.totalValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        ${formatPrice(item.totalValue)}
                       </strong>
-                      <span
-                        className={
-                          item.profitDollar >= 0
-                            ? "green"
-                            : "red"
-                        }
-                      >
-                        {item.profitDollar >= 0 ? "+" : ""}${Math.abs(item.profitDollar).toFixed(2)} ({item.profitPercent >= 0 ? "+" : ""}{item.profitPercent.toFixed(2)}%)
+                      <span className={`profit-dollar ${item.profitDollar >= 0 ? "green" : "red"}`}>
+                        {item.profitDollar >= 0 ? "+" : ""}${Math.abs(item.profitDollar).toFixed(2)}
                       </span>
+                      <small className={`profit-percent ${item.profitPercent >= 0 ? "green" : "red"}`}>
+                        ({item.profitPercent >= 0 ? "+" : ""}{item.profitPercent.toFixed(2)}%)
+                      </small>
                     </div>
                   </div>
 
                   <div className="portfolio-detail">
                     <div>
-                      <small>Avg Buy</small>
-                      <span>${item.avgBuyPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                      <small>Harga Beli Rata²</small>
+                      <span>${formatPrice(item.avgBuyPrice)}</span>
                     </div>
                     <div>
-                      <small>Current</small>
-                      <span>${item.currentPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                      <small>Harga Sekarang</small>
+                      <span>${formatPrice(item.currentPrice)}</span>
                     </div>
                     <div>
-                      <small>Invested</small>
-                      <span>${item.invested.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                      <small>Modal</small>
+                      <span>${formatPrice(item.invested)}</span>
                     </div>
                   </div>
                 </div>
@@ -475,9 +506,9 @@ const Dashboard = () => {
             </section>
 
             {/* MARKET */}
-            <section className="card">
+            <section className="card no-hover">
               <div className="section-header">
-                <h3>Pasar Kripto <small>(7 teratas)</small></h3>
+                <h3><BarChart3 size={18} /> Pasar Kripto <small>(7 teratas)</small></h3>
                 <span onClick={() => setMenu("simulasi")}>Lihat Semua →</span>
               </div>
 
@@ -497,7 +528,16 @@ const Dashboard = () => {
                     </div>
 
                     <div className="market-right">
-                      <strong>${Number(coin.current_price).toLocaleString()}</strong>
+                      <strong>${formatPrice(Number(coin.current_price))}</strong>
+                      {coin.market_cap && (
+                        <span className="market-cap-label">
+                          MCap: ${coin.market_cap >= 1e12
+                            ? `${(coin.market_cap / 1e12).toFixed(1)}T`
+                            : coin.market_cap >= 1e9
+                              ? `${(coin.market_cap / 1e9).toFixed(1)}B`
+                              : `${(coin.market_cap / 1e6).toFixed(1)}M`}
+                        </span>
+                      )}
                       <span
                         className={coin.price_change_percentage_24h >= 0 ? "green" : "red"}
                       >
@@ -540,6 +580,60 @@ const Dashboard = () => {
       </nav>
 
       {showIntro && <Onboarding onComplete={handleIntroComplete} />}
+
+      {/* MODAL SEMUA PORTOFOLIO */}
+      {showAllPortfolio && (
+        <div className="portfolio-modal-overlay" onClick={() => setShowAllPortfolio(false)}>
+          <div className="portfolio-modal-box" onClick={(e) => e.stopPropagation()}>
+            <div className="portfolio-modal-header">
+              <h2>Semua Aset Kripto Kamu 💼</h2>
+              <button className="close-btn" onClick={() => setShowAllPortfolio(false)}>×</button>
+            </div>
+            <div className="portfolio-modal-body">
+              {portfolioWithPrice.map((item: any, index: number) => (
+                <div key={index} className={`portfolio-card ${item.profitDollar >= 0 ? "trend-up" : "trend-down"}`}>
+                  <div className="portfolio-item">
+                    <div className="left">
+                      {item.image ? (
+                        <img src={item.image} alt={item.name} className="coin-img" />
+                      ) : (
+                        <span className="coin">{item.symbol?.[0] || "?"}</span>
+                      )}
+                      <div>
+                        <strong>{item.name}</strong>
+                        <p>{item.quantity.toFixed(6)} {item.symbol}</p>
+                      </div>
+                    </div>
+                    <div className="right">
+                      <strong>${formatPrice(item.totalValue)}</strong>
+                      <span className={`profit-dollar ${item.profitDollar >= 0 ? "green" : "red"}`}>
+                        {item.profitDollar >= 0 ? "+" : ""}${Math.abs(item.profitDollar).toFixed(2)}
+                      </span>
+                      <small className={`profit-percent ${item.profitPercent >= 0 ? "green" : "red"}`}>
+                        ({item.profitPercent >= 0 ? "+" : ""}{item.profitPercent.toFixed(2)}%)
+                      </small>
+                    </div>
+                  </div>
+                  <div className="portfolio-detail">
+                    <div>
+                      <small>Harga Beli</small>
+                      <span>${formatPrice(item.avgBuyPrice)}</span>
+                    </div>
+                    <div>
+                      <small>Harga Sekarang</small>
+                      <span>${formatPrice(item.currentPrice)}</span>
+                    </div>
+                    <div>
+                      <small>Modal</small>
+                      <span>${formatPrice(item.invested)}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* MODAL PROFIL & LOGOUT */}
       {showProfileModal && (
