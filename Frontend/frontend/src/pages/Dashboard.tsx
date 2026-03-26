@@ -16,6 +16,7 @@ import Belajar from "./Belajar";
 import Komunitas from "./Komunitas";
 import Ai from "./Ai";
 import Onboarding from "./Onboarding";
+import CryptoNewsWidget from "../components/CryptoNewsWidget";
 
 type Menu = "beranda" | "simulasi" | "belajar" | "komunitas" | "mentor";
 
@@ -508,6 +509,8 @@ const Dashboard = () => {
                 ))}
               </div>
             </section>
+
+            <CryptoNewsWidget />
           </div>
         )}
 

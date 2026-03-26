@@ -15,6 +15,7 @@ import Qna from "./Qna";
 import PantauSiswa from "./PantauSiswa";
 import Createforum from "./Createforum";
 import MentorForumFeed from "./MentorForumFeed";
+import CryptoNewsWidget from "../../components/CryptoNewsWidget";
 
 type Menu = "live" | "qna" | "siswa" | "broadcast";
 
@@ -471,6 +472,8 @@ const MentorDashboard: React.FC = () => {
               </div>
             )}
           </div>
+          
+          <CryptoNewsWidget />
         </>
       )}
 

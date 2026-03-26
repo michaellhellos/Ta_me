@@ -15,6 +15,7 @@ import HargaAsset from "./HargaAsset";
 import User from "./User";
 import Mentor from "./Mentor";
 import AdminInbox from "./AdminInbox";
+import CryptoNewsWidget from "../../components/CryptoNewsWidget";
 import API from "../services/api";
 import {
   Chart as ChartJS,
@@ -264,6 +265,8 @@ const DashboardAdmin: React.FC = () => {
                 <Line data={lineChartData} options={{ ...chartOptions, maintainAspectRatio: false }} />
               </div>
             </div>
+
+            <CryptoNewsWidget />
           </>
         )}
 
