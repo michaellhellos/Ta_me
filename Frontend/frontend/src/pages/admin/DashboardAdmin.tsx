@@ -13,7 +13,7 @@ import {
 import KontenEdukasi from "./KontenEdukasi";
 import HargaAsset from "./HargaAsset";
 // haii
-import User from './User'
+import User from './UserAdmin'
 import Mentor from "./Mentor";
 import AdminInbox from "./AdminInbox";
 import CryptoNewsWidget from "../../components/CryptoNewsWidget";
