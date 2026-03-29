@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import KontenEdukasi from "./KontenEdukasi";
 import HargaAsset from "./HargaAsset";
-import User from "./User";
+import User from './User'
 import Mentor from "./Mentor";
 import AdminInbox from "./AdminInbox";
 import CryptoNewsWidget from "../../components/CryptoNewsWidget";
