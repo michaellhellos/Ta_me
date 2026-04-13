@@ -167,10 +167,9 @@ export default function DashboardAdmin() {
                   <h1 className="welcome-title">Halo, {adminName} 👋</h1>
                   <p className="welcome-subtitle">Selamat datang kembali. Berikut adalah ikhtisar performa ekosistem KRIPTO-Z hari ini.</p>
                 </div>
-                <div className="action-buttons">
-                  <button className="btn-secondary"><span className="material-symbols-outlined" style={{ fontSize: '18px' }}>download</span> Unduh Laporan</button>
-                  <button className="btn-primary">Buat Pengumuman</button>
-                </div>
+                {/* <div className="action-buttons">
+                 <button className="btn-primary">Buat Pengumuman</button>
+                </div> */}
               </div>
 
               <div className="bento-grid">
