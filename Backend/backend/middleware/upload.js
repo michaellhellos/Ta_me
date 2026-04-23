@@ -1,6 +1,6 @@
 const multer = require("multer");
 const path = require("path");
-const { v4: uuidv4 } = require("uuid");
+const crypto = require("crypto");
 const fs = require("fs");
 
 /* =========================
@@ -46,7 +46,7 @@ const storage = multer.diskStorage({
     },
     filename: (_req, file, cb) => {
         const ext = path.extname(file.originalname).toLowerCase();
-        const uniqueName = uuidv4() + ext;
+        const uniqueName = crypto.randomUUID() + ext;
         cb(null, uniqueName);
     }
 });
