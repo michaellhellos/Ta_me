@@ -3,10 +3,10 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { io } from "socket.io-client";
 import { ArrowLeft, Send, MessageCircle } from "lucide-react";
-import { BACKEND_URL, API_URL } from "../config";
+import { BACKEND_URL, API_URL, SOCKET_ENABLED } from "../config";
 import "./Chat.css";
 
-const socket = io(BACKEND_URL);
+const socket = SOCKET_ENABLED ? io(BACKEND_URL) : null;
 
 /* ── Types ── */
 type Message = {
@@ -187,15 +187,15 @@ const Chat = () => {
     markAllRead();
 
     // Join socket room
-    socket.emit("join_conversation", conversationId);
+    socket?.emit("join_conversation", conversationId);
 
     // Receive message (sender excluded via socket.to on server)
-    socket.on("receive_message", (data: Message) => {
+    socket?.on("receive_message", (data: Message) => {
       setMessages((prev) => [...prev, data]);
 
       // Auto-mark as read (chat is open)
       if (data._id) {
-        socket.emit("message_read", {
+        socket?.emit("message_read", {
           conversationId,
           messageId: data._id,
         });
@@ -203,7 +203,7 @@ const Chat = () => {
     });
 
     // Read receipt update
-    socket.on("message_read_update", (data: any) => {
+    socket?.on("message_read_update", (data: any) => {
       setMessages((prev) =>
         prev.map((msg) =>
           msg._id === data.messageId ? { ...msg, isRead: true } : msg
@@ -212,14 +212,14 @@ const Chat = () => {
     });
 
     // Typing indicators
-    socket.on("user_typing", () => setIsPartnerTyping(true));
-    socket.on("user_stop_typing", () => setIsPartnerTyping(false));
+    socket?.on("user_typing", () => setIsPartnerTyping(true));
+    socket?.on("user_stop_typing", () => setIsPartnerTyping(false));
 
     return () => {
-      socket.off("receive_message");
-      socket.off("message_read_update");
-      socket.off("user_typing");
-      socket.off("user_stop_typing");
+      socket?.off("receive_message");
+      socket?.off("message_read_update");
+      socket?.off("user_typing");
+      socket?.off("user_stop_typing");
     };
   }, [conversationId]);
 
@@ -236,13 +236,13 @@ const Chat = () => {
 
       const newMessage = res.data.data;
 
-      socket.emit("send_message", {
+      socket?.emit("send_message", {
         ...newMessage,
         conversationId,
       });
 
       // Stop typing
-      socket.emit("stop_typing", { conversationId, userId: myId });
+      socket?.emit("stop_typing", { conversationId, userId: myId });
 
       setMessages((prev) => [...prev, newMessage]);
       setText("");
@@ -255,11 +255,11 @@ const Chat = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setText(e.target.value);
 
-    socket.emit("typing", { conversationId, userId: myId });
+    socket?.emit("typing", { conversationId, userId: myId });
 
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     typingTimeoutRef.current = setTimeout(() => {
-      socket.emit("stop_typing", { conversationId, userId: myId });
+      socket?.emit("stop_typing", { conversationId, userId: myId });
     }, 2000);
   };
 

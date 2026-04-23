@@ -2,10 +2,10 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
-import { BACKEND_URL, API_URL } from "../../config";
+import { BACKEND_URL, API_URL, SOCKET_ENABLED } from "../../config";
 import "./MentorDashboard.css";
 
-const socket = io(BACKEND_URL);
+const socket = SOCKET_ENABLED ? io(BACKEND_URL) : null;
 
 interface Participant {
   _id: string;
@@ -72,7 +72,7 @@ const Qna: React.FC = () => {
 
     fetchConversations();
 
-    socket.on("receive_message", (data) => {
+    socket?.on("receive_message", (data) => {
       setConversations((prev) => {
         const convExists = prev.find((c) => c._id === data.conversationId);
         
@@ -95,7 +95,7 @@ const Qna: React.FC = () => {
     });
 
     return () => {
-      socket.off("receive_message");
+      socket?.off("receive_message");
     };
   }, [token]);
 
