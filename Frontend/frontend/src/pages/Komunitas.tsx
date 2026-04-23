@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import Toast from "./Toast";
+import { BACKEND_URL, API_URL } from "../config";
 import "./Komunitas.css";
 
-const API = "http://localhost:5000/api/community";
-const TRADE_API = "http://localhost:5000/api/trade";
+const API = `${API_URL}/community`;
+const TRADE_API = `${API_URL}/trade`;
 
 interface Attachment {
   url: string;
@@ -440,7 +441,7 @@ const Komunitas = () => {
                       <a
                         key={i}
                         className="post-file-link"
-                        href={`http://localhost:5000${att.url}`}
+                        href={`${BACKEND_URL}${att.url}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         download

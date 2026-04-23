@@ -11,6 +11,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import axios from "axios";
+import { API_URL } from "../../config";
 import Qna from "./Qna";
 import PantauSiswa from "./PantauSiswa";
 import Createforum from "./Createforum";
@@ -110,13 +111,13 @@ const MentorDashboard: React.FC = () => {
 
     // Fetch profile and live stats
     Promise.all([
-      axios.get("http://localhost:5000/api/user/me", {
+      axios.get(`${API_URL}/user/me`, {
         headers: { Authorization: `Bearer ${token}` },
       }),
-      axios.get("http://localhost:5000/api/trade/mentor/students", {
+      axios.get(`${API_URL}/trade/mentor/students`, {
         headers: { Authorization: `Bearer ${token}` },
       }),
-      axios.get("http://localhost:5000/api/chat/conversation", {
+      axios.get(`${API_URL}/chat/conversation`, {
         headers: { Authorization: `Bearer ${token}` },
       }),
     ])
@@ -143,7 +144,7 @@ const MentorDashboard: React.FC = () => {
   const fetchSchedules = async () => {
     try {
       const res = await axios.get(
-        "http://localhost:5000/api/schedule/mentor",
+        `${API_URL}/schedule/mentor`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       if (res.data.success) {
@@ -171,7 +172,7 @@ const MentorDashboard: React.FC = () => {
       const dateTime = new Date(`${form.date}T${form.time}`);
 
       await axios.post(
-        "http://localhost:5000/api/schedule",
+        `${API_URL}/schedule`,
         {
           title: form.title,
           description: form.description,
@@ -195,7 +196,7 @@ const MentorDashboard: React.FC = () => {
     if (!window.confirm("Yakin ingin menghapus jadwal ini?")) return;
 
     try {
-      await axios.delete(`http://localhost:5000/api/schedule/${id}`, {
+      await axios.delete(`${API_URL}/schedule/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       fetchSchedules();
@@ -208,7 +209,7 @@ const MentorDashboard: React.FC = () => {
     e.preventDefault();
     setUpdatingProfile(true);
     try {
-      const res = await fetch("http://localhost:5000/api/user/profile", {
+      const res = await fetch(`${API_URL}/user/profile`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

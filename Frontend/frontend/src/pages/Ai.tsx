@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { MessageCircle, UserX, Calendar, Clock, ExternalLink } from "lucide-react";
+import { API_URL } from "../config";
 import "./Ai.css";
 
 type User = {
@@ -78,7 +79,7 @@ const Ai = () => {
     const fetchMentors = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:5000/api/auth/user?role=mentor"
+          `${API_URL}/auth/user?role=mentor`
         );
         if (res.data.success) {
           setMentors(res.data.data);
@@ -93,7 +94,7 @@ const Ai = () => {
     const fetchSchedules = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:5000/api/schedule/upcoming"
+          `${API_URL}/schedule/upcoming`
         );
         if (res.data.success) {
           setSchedules(res.data.data || []);
@@ -111,7 +112,7 @@ const Ai = () => {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.post(
-        "http://localhost:5000/api/chat/conversation",
+        `${API_URL}/chat/conversation`,
         { receiverId: mentorId },
         { headers: { Authorization: `Bearer ${token}` } }
       );

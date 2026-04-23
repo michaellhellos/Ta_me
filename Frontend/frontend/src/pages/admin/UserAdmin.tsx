@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { API_URL } from "../../config";
 import "./UserAdmin.css";
 
 interface User {
@@ -24,7 +25,7 @@ const UserAdmin: React.FC = () => {
   const fetchUsers = async () => {
     try {
       const res = await axios.get(
-        "http://localhost:5000/api/auth/user"
+        `${API_URL}/auth/user`
       );
 
       if (res.data.success) {
@@ -46,7 +47,7 @@ const UserAdmin: React.FC = () => {
 
     try {
       await axios.put(
-        `http://localhost:5000/api/auth/user/${selectedUser._id}`,
+        `${API_URL}/auth/user/${selectedUser._id}`,
         selectedUser
       );
 

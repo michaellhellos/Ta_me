@@ -6,8 +6,9 @@ import EmojiPicker from "emoji-picker-react";
 import type { EmojiClickData } from "emoji-picker-react";
 import "./MentorDashboard.css";
 import "./Createforum.css";
+import { BACKEND_URL, API_URL } from "../../config";
 
-const API = "http://localhost:5000/api/community";
+const API = `${API_URL}/community`;
 
 const QUILL_MODULES = {
   toolbar: [
@@ -104,7 +105,7 @@ const Createforum: React.FC<CreateforumProps> = ({ onPostCreated }) => {
       const quill = quillRef.current?.getEditor();
       if (quill) {
         const range = quill.getSelection(true);
-        quill.insertEmbed(range.index, "image", `http://localhost:5000${data.url}`);
+        quill.insertEmbed(range.index, "image", `${BACKEND_URL}${data.url}`);
         quill.setSelection(range.index + 1, 0);
       }
 

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { API_URL } from "../../config";
 import "./PantauSiswa.css";
 
 interface Student {
@@ -39,7 +40,7 @@ const PantauSiswa: React.FC = () => {
       setLoading(true);
 
       const res = await axios.get(
-        "http://localhost:5000/api/trade/mentor/students",
+        `${API_URL}/trade/mentor/students`,
         {
           headers: { Authorization: `Bearer ${token}` }
         }
@@ -61,7 +62,7 @@ const PantauSiswa: React.FC = () => {
       setLoading(true);
 
       const res = await axios.get(
-        `http://localhost:5000/api/trade/mentor/history/${userId}`,
+        `${API_URL}/trade/mentor/history/${userId}`,
         {
           headers: { Authorization: `Bearer ${token}` }
         }

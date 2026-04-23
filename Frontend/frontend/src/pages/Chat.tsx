@@ -3,9 +3,10 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { io } from "socket.io-client";
 import { ArrowLeft, Send, MessageCircle } from "lucide-react";
+import { BACKEND_URL, API_URL } from "../config";
 import "./Chat.css";
 
-const socket = io("http://localhost:5000");
+const socket = io(BACKEND_URL);
 
 /* ── Types ── */
 type Message = {
@@ -125,7 +126,7 @@ const Chat = () => {
     if (!conversationId || !token) return;
 
     axios
-      .get("http://localhost:5000/api/chat/conversation", {
+      .get(`${API_URL}/chat/conversation`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
@@ -158,7 +159,7 @@ const Chat = () => {
     const fetchMessages = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:5000/api/chat/message/${conversationId}`,
+          `${API_URL}/chat/message/${conversationId}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         if (res.data.success) {
@@ -173,7 +174,7 @@ const Chat = () => {
     const markAllRead = async () => {
       try {
         await axios.put(
-          `http://localhost:5000/api/chat/mark-read/${conversationId}`,
+          `${API_URL}/chat/mark-read/${conversationId}`,
           {},
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -228,7 +229,7 @@ const Chat = () => {
 
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/chat/message",
+        `${API_URL}/chat/message`,
         { conversationId, text },
         { headers: { Authorization: `Bearer ${token}` } }
       );

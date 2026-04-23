@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { API_URL } from "../../config";
 import "./HargaAsset.css";
 
 interface Coin {
@@ -21,7 +22,7 @@ const HargaAsset: React.FC = () => {
 
   const fetchCoins = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/trade/coins");
+      const res = await axios.get(`${API_URL}/trade/coins`);
 
       if (res.data.success) {
         setCoins(res.data.data);

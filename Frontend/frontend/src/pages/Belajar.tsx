@@ -8,6 +8,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import Toast from "./Toast";
+import { API_URL } from "../config";
 import "./Belajar.css";
 
 interface Quiz {
@@ -111,7 +112,7 @@ const Belajar = () => {
 
     // Fetch materi
     setLoading(true);
-    fetch("http://localhost:5000/api/materi/materi")
+    fetch(`${API_URL}/materi/materi`)
       .then((res) => res.json())
       .then((data) => {
         if (data.success) setMateriList(data.data);
@@ -122,7 +123,7 @@ const Belajar = () => {
     // Fetch user's XP scores
     const currentUserId = user?._id || user?.id;
     if (currentUserId) {
-      fetch(`http://localhost:5000/api/nilai/user/${currentUserId}`)
+      fetch(`${API_URL}/nilai/user/${currentUserId}`)
         .then((res) => res.json())
         .then((data) => {
           if (data.success) {
@@ -141,7 +142,7 @@ const Belajar = () => {
 
     // Fetch schedules
     setSchedulesLoading(true);
-    fetch("http://localhost:5000/api/schedule/upcoming")
+    fetch(`${API_URL}/schedule/upcoming`)
       .then((res) => res.json())
       .then((data) => {
         if (data.success) setSchedules(data.data || []);
@@ -165,7 +166,7 @@ const Belajar = () => {
 
     setIsRedeeming(true);
     try {
-      const response = await fetch("http://localhost:5000/api/nilai/redeem", {
+      const response = await fetch(`${API_URL}/nilai/redeem`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: redeemUserId, amountXp: amount }),
@@ -225,7 +226,7 @@ const Belajar = () => {
 
     try {
       setSubmitting(true);
-      const response = await fetch("http://localhost:5000/api/nilai", {
+      const response = await fetch(`${API_URL}/nilai`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

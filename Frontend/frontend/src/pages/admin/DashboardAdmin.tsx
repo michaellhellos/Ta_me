@@ -8,6 +8,7 @@ import Mentor from "./Mentor";
 import AdminInbox from "./AdminInbox";
 import CryptoNewsWidget from "../../components/CryptoNewsWidget";
 import API from "../services/api";
+import { API_URL } from "../../config";
 import {
   Chart as ChartJS, CategoryScale, LinearScale, PointElement,
   LineElement, BarElement, Filler, Tooltip, Legend,
@@ -38,10 +39,10 @@ export default function DashboardAdmin() {
     const fetchStats = async () => {
       try {
         const [usersRes, mentorsRes, coinsRes, statsRes] = await Promise.all([
-          fetch("http://localhost:5000/api/auth/user"),
+          fetch(`${API_URL}/auth/user`),
           API.get("/mentor"),
-          fetch("http://localhost:5000/api/trade/coins"),
-          fetch("http://localhost:5000/api/admin/dashboard-stats"),
+          fetch(`${API_URL}/trade/coins`),
+          fetch(`${API_URL}/admin/dashboard-stats`),
         ]);
 
         const usersData = await usersRes.json();

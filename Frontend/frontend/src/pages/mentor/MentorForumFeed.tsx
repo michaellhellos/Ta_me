@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { BACKEND_URL, API_URL } from "../../config";
 import "../Komunitas.css";
 import "./MentorForumFeed.css";
 
-const API = "http://localhost:5000/api/community";
+const API = `${API_URL}/community`;
 
 interface Attachment {
     url: string;
@@ -264,7 +265,7 @@ const MentorForumFeed: React.FC<MentorForumFeedProps> = ({ refreshKey }) => {
                                         <a
                                             key={i}
                                             className="post-file-link"
-                                            href={`http://localhost:5000${att.url}`}
+                                            href={`${BACKEND_URL}${att.url}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             download

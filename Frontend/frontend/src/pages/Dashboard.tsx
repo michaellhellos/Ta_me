@@ -9,6 +9,7 @@ import {
   TrendingDown,
 } from "lucide-react";
 import "./Dashboard.css";
+import { API_URL } from "../config";
 import Simulasi from "./Simulasi";
 import Belajar from "./Belajar";
 import Komunitas from "./Komunitas";
@@ -84,7 +85,7 @@ const Dashboard = () => {
   const [editPassword, setEditPassword] = useState("");
   const [updatingProfile, setUpdatingProfile] = useState(false);
 
-  const API = "http://localhost:5000/api/trade";
+  const API = `${API_URL}/trade`;
 
   // ================= FETCH DATA =================
   // Check onboarding on mount
@@ -107,7 +108,7 @@ const Dashboard = () => {
 
         const [coinRes, userRes, historyRes] = await Promise.all([
           fetch(`${API}/coins`),
-          fetch("http://localhost:5000/api/user/me", {
+          fetch(`${API_URL}/user/me`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
           fetch(`${API}/history`, {
@@ -261,7 +262,7 @@ const Dashboard = () => {
     setUpdatingProfile(true);
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:5000/api/user/profile", {
+      const res = await fetch(`${API_URL}/user/profile`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

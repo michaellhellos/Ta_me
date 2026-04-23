@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { API_URL } from "../../config";
 import "./KontenEdukasi.css";
 
 interface Quiz {
@@ -52,7 +53,7 @@ const KontenEdukasi: React.FC = () => {
     try {
       setLoading(true);
 
-      const response = await fetch("http://localhost:5000/api/materi/materi", {
+      const response = await fetch(`${API_URL}/materi/materi`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

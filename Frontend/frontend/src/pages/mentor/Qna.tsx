@@ -2,9 +2,10 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
+import { BACKEND_URL, API_URL } from "../../config";
 import "./MentorDashboard.css";
 
-const socket = io("http://localhost:5000");
+const socket = io(BACKEND_URL);
 
 interface Participant {
   _id: string;
@@ -44,7 +45,7 @@ const Qna: React.FC = () => {
       setError("");
 
       const res = await axios.get(
-        "http://localhost:5000/api/chat/conversation",
+        `${API_URL}/chat/conversation`,
         {
           headers: { Authorization: `Bearer ${token}` }
         }
@@ -106,13 +107,13 @@ const Qna: React.FC = () => {
     try {
       setLoading(true);
       // 1. Get Admin _id
-      const adminRes = await axios.get("http://localhost:5000/api/auth/user?role=admin");
+      const adminRes = await axios.get(`${API_URL}/auth/user?role=admin`);
       if (adminRes.data.success && adminRes.data.data.length > 0) {
         const adminId = adminRes.data.data[0]._id;
         
         // 2. Create/Get chat conversation
         const convRes = await axios.post(
-          "http://localhost:5000/api/chat/conversation",
+          `${API_URL}/chat/conversation`,
           { receiverId: adminId },
           { headers: { Authorization: `Bearer ${token}` } }
         );

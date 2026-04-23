@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from "react";
+import { API_URL } from "../config";
 import {
   AreaChart,
   Area,
@@ -43,7 +44,7 @@ type ToastData = {
   type: "success" | "error" | "info";
 } | null;
 
-const API = "http://localhost:5000/api/trade";
+const API = `${API_URL}/trade`;
 
 /* ── Custom Chart Tooltip ── */
 const CustomTooltip = ({ active, payload, label }: any) => {

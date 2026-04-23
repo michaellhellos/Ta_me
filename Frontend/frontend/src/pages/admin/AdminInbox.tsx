@@ -2,9 +2,10 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
+import { BACKEND_URL, API_URL } from "../../config";
 import "../mentor/MentorDashboard.css"; // Reuse modern Qna styling
 
-const socket = io("http://localhost:5000");
+const socket = io(BACKEND_URL);
 
 interface Participant {
   _id: string;
@@ -44,7 +45,7 @@ const AdminInbox: React.FC = () => {
       setError("");
 
       const res = await axios.get(
-        "http://localhost:5000/api/chat/conversation",
+        `${API_URL}/chat/conversation`,
         {
           headers: { Authorization: `Bearer ${token}` }
         }
