@@ -140,8 +140,13 @@ io.on("connection", (socket) => {
    START SERVER
 ========================= */
 
-const PORT = process.env.PORT || 5000;
-
-server.listen(PORT, () => {
-  console.log(`Server berjalan di http://localhost:${PORT}`);
-});
+// Vercel serverless: export app, don't listen
+// Local dev: start HTTP server with Socket.IO
+if (process.env.VERCEL) {
+  module.exports = app;
+} else {
+  const PORT = process.env.PORT || 5000;
+  server.listen(PORT, () => {
+    console.log(`Server berjalan di http://localhost:${PORT}`);
+  });
+}
